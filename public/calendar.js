@@ -1228,7 +1228,8 @@ function checkDisclaimer() {
     }
 }
 
-function acceptDisclaimer() {
+// Add "window." to make it globally visible
+window.acceptDisclaimer = function() {
     document.cookie = "legalAcceptedSession=true; path=/; SameSite=Lax";
 
     const banner = document.getElementById("legal-disclaimer");

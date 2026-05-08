@@ -1714,11 +1714,12 @@ function checkDisclaimer() {
         if (banner) banner.style.display = "block";
     }
 }
-function acceptDisclaimer() {
+// Add "window." to make it globally visible
+window.acceptDisclaimer = function() {
     document.cookie = "legalAcceptedSession=true; path=/; SameSite=Lax";
     const banner = document.getElementById("legal-disclaimer");
     if (banner) banner.style.display = "none";
-}
+};
 window.addEventListener("load", checkDisclaimer);
 document.addEventListener("DOMContentLoaded", function() {
     const sidebar = document.getElementById("semesterWrapper");
