@@ -1,3 +1,18 @@
+// --- JSON IMPORTS ---
+const teachersData = require('../static/jsonData/teachers.json');
+const academicCalendarData = require('../static/jsonData/academic_calendar.json');
+const coursesData = require('../static/jsonData/courses.json');
+const mergedScheduleData = require('../static/jsonData/merged_schedule.json');
+const mergedExamsData = require('../static/jsonData/merged_exams.json');
+const mergedLabsData = require('../static/jsonData/merged_labs.json');
+
+// Optional files - catch errors if they don't exist yet
+let semesterExamsData = null, makeUpExamsData = null, septemberExamsData = null;
+try { semesterExamsData = require('../static/jsonData/semester_exams.json'); } catch(e) {}
+try { makeUpExamsData = require('../static/jsonData/make_up_exams.json'); } catch(e) {}
+try { septemberExamsData = require('../static/jsonData/september_exams.json'); } catch(e) {}
+
+
 //GLOBAL VARIABLES
 let calendar;
 let academicData = null;
@@ -100,13 +115,10 @@ const daysMapGreek = {
     "7": "Κυριακή"
 };
 
-//API FETCHERS
+//API FETCHERS (Now using locally required variables)
 async function fetchAcademicData() {
-    //gets data from academic_calendar.json
     try {
-        const response = await fetch("http://localhost:8000/jsonData/academic_calendar.json");
-        if (!response.ok) throw new Error("File not found");
-        academicData = await response.json();
+        academicData = academicCalendarData;
     } catch (err) {
         console.error("Error loading local JSON:", err);
     }
@@ -114,9 +126,7 @@ async function fetchAcademicData() {
 
 async function fetchProfessorLinks() {
     try {
-        const response = await fetch("http://localhost:8000/jsonData/teachers.json");
-        if (!response.ok) throw new Error("Links file not found");
-        professorLinks = await response.json();
+        professorLinks = teachersData;
     } catch (err) {
         console.error("Error loading professor links:", err);
     }
@@ -124,47 +134,58 @@ async function fetchProfessorLinks() {
 
 async function fetchTitleLinks() {
     try {
-        const response = await fetch("http://localhost:8000/jsonData/courses.json");
-        if (!response.ok) throw new Error("Links file not found");
-        titleLinks = await response.json();
+        titleLinks = coursesData;
 
         Object.entries(titleLinks).forEach(([title, url]) => {
             normalizedTitleLinks[normalizeTitleName(title)] = url;
         });
-
     } catch (err) {
         console.error("Error loading courses:", err);
     }
 }
 
-//get's data of class based on title
 async function fetchCourseData(title) {
-    // CHANGED: Fixed typo in URL space
-    const res = await fetch("http://localhost:8000/getClass", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title }),
-    });
-    return res.ok ? res.json() : { schedules: [] };
+    try {
+        const scheduleData = mergedScheduleData.find((course) => course.title === title);
+
+        if (!scheduleData) {
+            console.warn("Class not found");
+            return { schedules: [] };
+        }
+
+        const mappedSchedules = scheduleData.daysOfWeek.map((day, index) => {
+            return {
+                title: scheduleData.title,
+                day: day,
+                lectureHall: scheduleData.lectureHall[index],
+                start: scheduleData.startTime[index],
+                end: scheduleData.endTime[index],
+                color: scheduleData.color,
+                professor: scheduleData.professor,
+                semester: scheduleData.semester,
+            };
+        });
+
+        return { schedules: mappedSchedules };
+
+    } catch (err) {
+        console.error("Error processing course data:", err);
+        return { schedules: [] };
+    }
 }
 
 //get's exam data
 async function fetchExamData(title) {
     try {
-        // CHANGED: Added missing backend URL
-        const res = await fetch("http://localhost:8000/getExam", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title }),
-        });
-        if (res.ok) {
-            const data = await res.json();
-            return data.exam;
-        }
+        const baseTitle = title.split("(")[0].trim();
+        const examData = mergedExamsData.find((exam) => exam.title === title) || 
+                         mergedExamsData.find((exam) => exam.title === baseTitle);
+
+        return examData || null;
     } catch (e) {
-        console.warn(`No exam found for: ${title}`);
+        console.warn(`No exam found for: ${title}`, e);
+        return null;
     }
-    return null;
 }
 
 //EVENT HANDLERS
@@ -192,7 +213,7 @@ function handleEventClick(info) {
     titleEl.innerHTML = link
         ? `<a href="${link}" target="_blank" style="color: inherit; text-decoration: none;">
          ${originalTitle}
-       </a>`
+        </a>`
         : originalTitle;
 
     let profs = props.professor;
@@ -240,8 +261,8 @@ async function examOptions() {
             pdfWrapper.id = "exam-pdf-wrapper"; // Give it a unique ID to check later
 
             const pdfLink = document.createElement("a");
-            // CHANGED: Added missing backend URL
-            pdfLink.href = "http://localhost:8000/download-exams";
+            // Assuming uploads folder is statically served
+            pdfLink.href = "uploads/exams.pdf";
             pdfLink.download = "exams.pdf";
             pdfLink.textContent = "Λήψη Εξεταστικής (PDF)";
             pdfLink.id = "pdf-download-link"; // Reuses your existing CSS
@@ -266,7 +287,7 @@ async function examOptions() {
             pdfWrapper.id = "pdf-wrapper";
 
             const pdfLink = document.createElement("a");
-            pdfLink.href = "http://localhost:8000/download-schedule";
+            pdfLink.href = "uploads/schedule.pdf";
             pdfLink.download = "schedule.pdf";
             pdfLink.textContent = "Λήψη Προγράμματος (PDF)";
             pdfLink.id = "pdf-download-link";
@@ -275,45 +296,21 @@ async function examOptions() {
             semesters.appendChild(pdfWrapper);
         }
 
-
-
-
-
         semesters.style.display = "flex";
         examsBox.style.display = "none";
     }
 
-    let isWinter = 0;
+    let isWinter = false;
 
-    // Fetch winter semester status
-    try {
-        const response = await fetch("http://localhost:8000/getSemesterOfExams", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(),
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to fetch semester's exams");
-        }
-
-        isWinter = await response.json();
-    } catch (error) {
-        // alert("Something went wrong");
+    // Determine winter semester status from required JSONs
+    if (semesterExamsData && Array.isArray(semesterExamsData) && semesterExamsData.length > 0 && semesterExamsData[0].semester) {
+        isWinter = semesterExamsData[0].semester % 2 !== 0;
+    } else if (makeUpExamsData && Array.isArray(makeUpExamsData) && makeUpExamsData.length > 0 && makeUpExamsData[0].semester) {
+        isWinter = makeUpExamsData[0].semester % 2 === 0;
     }
 
-    //Check if september_exams.json exists
-    try {
-        const septResponse = await fetch("http://localhost:8000/jsonData/september_exams.json", { method: "HEAD" });
-        if (septResponse.ok) {
-            isSeptember = true;
-        } else {
-            isSeptember = false;
-        }
-    } catch (error) {
-        console.warn("September exams file not found or could not be checked.");
-        isSeptember = false;
-    }
+    //Check if september exams exist
+    isSeptember = septemberExamsData !== null;
 
     let isNormalClicked = false;   //by default the normal exams are shown and the embolim are not, so we set the normal to true and the embolim to false
     let isEmbolimClicked = false;   //tracked what tabs are open and which are closed 
@@ -466,6 +463,8 @@ async function handleCourseToggle(checkbox, targetTitle) {
 async function addCourseToCalendar(targetTitle) {
     //new function, again, does the whole adding stuff to the calendar just made cleaner with a function
     const courseData = await fetchCourseData(targetTitle);
+
+    if (courseData.schedules.length === 0) return;
 
     let sem;
     sem = courseData.schedules[0].semester
@@ -854,39 +853,32 @@ document.querySelectorAll(".buttonDiv").forEach((button) => {
         let isLabMode = currentMode === "Εργαστήρια";
         let isExamMode = currentMode === "Εξεταστική";
 
-        //FETCH DATA BASED ON MODE
-        if (currentMode === "Μαθήματα") {
-            const res = await fetch("http://localhost:8000/getSemester", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ semester: sem }),
-            });
-            const data = await res.json();
-            dataArray = data.titles.map(c => ({ title: c.title, original: c }));
-        }
-        else if (isLabMode) {
-            const res = await fetch("http://localhost:8000/getLabs", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ semester: sem }),
-            });
-            const labs = await res.json();
-            dataArray = labs.map(l => ({ title: l.name, original: l }));
-        }
-        else if (isExamMode) {
-            if (isSeptember) {
-                const res = await fetch("http://localhost:8000/jsonData/september_exams.json");
-                const allSeptExams = await res.json();
-                dataArray = allSeptExams.filter(exam => String(exam.semester) === String(sem)).map(e => ({ title: e.title, original: e }));
-            } else {
-                const res = await fetch("http://localhost:8000/getSemesterExams", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ semester: sem }),
-                });
-                const exams = await res.json();
-                dataArray = exams.map(e => ({ title: e.title, original: e }));
+        //FETCH DATA BASED ON MODE DIRECTLY FROM LOCAL VARIABLES
+        try {
+            if (currentMode === "Μαθήματα") {
+                const data = mergedScheduleData;
+                const titles = data
+                    .filter((course) => String(course.semester) === String(sem))
+                    .map((course) => ({ title: course.title, original: course }));
+                dataArray = titles;
             }
+            else if (isLabMode) {
+                const labs = mergedLabsData;
+                const filteredLabs = labs.filter((lab) => String(lab.semester) === String(sem));
+                dataArray = filteredLabs.map(l => ({ title: l.name, original: l }));
+            }
+            else if (isExamMode) {
+                if (isSeptember && septemberExamsData) {
+                    const allSeptExams = septemberExamsData;
+                    dataArray = allSeptExams.filter(exam => String(exam.semester) === String(sem)).map(e => ({ title: e.title, original: e }));
+                } else {
+                    const exams = mergedExamsData;
+                    const semesterExams = exams.filter((exam) => String(exam.semester) === String(sem));
+                    dataArray = semesterExams.map(e => ({ title: e.title, original: e }));
+                }
+            }
+        } catch (err) {
+            console.error("Error accessing local data for semester expander:", err);
         }
 
         if (dataArray.length === 0) return;
@@ -968,7 +960,6 @@ document.querySelectorAll(".buttonDiv").forEach((button) => {
         // Initial Select All sync
         selectAllCheckbox.checked = itemCheckboxes.length > 0 && itemCheckboxes.every(cb => cb.checked);
 
-        // Select All Click Logic
         // Select All Click Logic
         selectAllDiv.onclick = (e) => {
             // Ignore the click if the button is currently on cooldown
@@ -1302,12 +1293,12 @@ addEventListener("resize", () => {
 
 // Event listener for the searchbar
 searchbar.addEventListener("keyup", async function (e) {
-    search = e.target.value; // Stores whatever the use wrote
+    let search = e.target.value; // Stores whatever the use wrote
 
     const semesters = document.getElementById("semesters"); // Getting the semesters from the documment so we can show or hide them
     const matchingCourses = document.getElementById("matchingCourses") // Getting the new div we made so we can add the matching classes there
     const examsBox = document.getElementById("examsBox"); // Also getting the examsbox so we can show or hide it
-    var titlesArray = {} // Creating this here so it can be used in all modes
+    var titlesArray = [] // Creating this here so it can be used in all modes
     const savedClasses = getSavedSchedule(); // Same for this
 
     // If it is not null we move on to show the user the matched courses
@@ -1319,96 +1310,81 @@ searchbar.addEventListener("keyup", async function (e) {
         }
         matchingCourses.innerHTML = ''; // Clearing the previous searches 
         matchingCourses.style.display = "block" // Making sure its visible
-        console.log(search)
         semesters.style.display = "none" // We remove the semesters so the sidebar does not get cluttered and ugly
         examsBox.style.display = "none" // Hiding the examsbox
 
-        // Fetching matching classes
-        const res = await fetch("http://localhost:8000/getSearch", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ search: search, mode: currentMode }), // Two arguments, both the search and the current mode
-        });
-        const data = await res.json(); //we save the data here
-        titlesArray = data.titles.map((course) => course.title); //and the titles in an array
+        // Fetching matching classes from local JSON variables
+        try {
+            let data = currentMode === "Μαθήματα" ? mergedScheduleData : 
+                       currentMode === "Εξεταστική" ? mergedExamsData : mergedLabsData;
+            
+            const titles = data
+                .filter((item) => String(item.title || item.name).toUpperCase().includes(String(search).toUpperCase()))
+                .map((item) => ({ title: item.title || item.name, original: item }));
+                
+            titlesArray = titles.map((course) => course.title);
 
-        // In case the search mathes no title we inform the user by creating a div containing a message
-        if (titlesArray.length === 0) {
-            const div = document.createElement("div");
+            // In case the search mathes no title we inform the user by creating a div containing a message
+            if (titlesArray.length === 0) {
+                const div = document.createElement("div");
 
-            div.style.textAlign = "center"
+                div.style.textAlign = "center"
 
-            const p = document.createElement("p");
-            p.textContent = "Δεν βρέθηκε μάθημα που να αντιστοιχεί σε '" + String(search) + "' :(";
-            p.style.color = "white"
-            p.style.fontFamily = "sans-serif"
+                const p = document.createElement("p");
+                p.textContent = "Δεν βρέθηκε μάθημα που να αντιστοιχεί σε '" + String(search) + "' :(";
+                p.style.color = "white"
+                p.style.fontFamily = "sans-serif"
 
-            div.append(p);
-            matchingCourses.appendChild(div);
+                div.append(p);
+                matchingCourses.appendChild(div);
 
-            return // We stop the function from doing anything else
-        }
-
-        //creates for each title in title array a div with a pargaraph and a checkbox in it so it generates everything dinamicly
-        titlesArray.forEach((title, i) => {
-            const div = document.createElement("div");
-            div.className = "course";
-
-            const p = document.createElement("p");
-            p.textContent = title;
-
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.className = "checkbox";
-            checkbox.checked = savedClasses.some(
-                (saved) => saved.title === title,
-            );
-
-            div.append(p, checkbox);
-            matchingCourses.appendChild(div);
-
-            setTimeout(() => div.classList.add("visible"), i * 50);
-
-            div.onclick = (e) => {
-                //ckeckbox logic on the div
-                if (checkbox.disabled || e.target === checkbox) return;
-                checkbox.checked = !checkbox.checked;
-                checkbox.dispatchEvent(new Event("change"));
-            };
-
-            checkbox.onchange = async () => {
-                if (currentMode === "Μαθήματα") {
-                    handleCourseToggle(checkbox, title);
-                } else if (currentMode === "Εργαστήρια") {
-
-                    const res = await fetch("http://localhost:8000/getLab", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ title: title })
-                    })
-                    const lab = await res.json();
-
-                    if (checkbox.checked) handleLabToggle(checkbox, lab);
-                    else removeLabFromCalendar(title)
-                } else if (currentMode === "Εξεταστική") {
-                   
-                    const res = await fetch("http://localhost:8000/getExam", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ title: title })
-                    })
-
-                    const examData = await res.json();
-               
-
-                    if (checkbox.checked) addStandaloneExam(examData.exam);
-                    else removeStandaloneExam(examData.exam.title);
-
-                }
-
+                return // We stop the function from doing anything else
             }
 
-        });
+            //creates for each title in title array a div with a pargaraph and a checkbox in it so it generates everything dinamicly
+            titles.forEach((itemObj, i) => {
+                let title = itemObj.title;
+                const div = document.createElement("div");
+                div.className = "course";
+
+                const p = document.createElement("p");
+                p.textContent = title;
+
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.className = "checkbox";
+                checkbox.checked = savedClasses.some(
+                    (saved) => saved.title === title,
+                );
+
+                div.append(p, checkbox);
+                matchingCourses.appendChild(div);
+
+                setTimeout(() => div.classList.add("visible"), i * 50);
+
+                div.onclick = (e) => {
+                    //ckeckbox logic on the div
+                    if (checkbox.disabled || e.target === checkbox) return;
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event("change"));
+                };
+
+                checkbox.onchange = async () => {
+                    if (currentMode === "Μαθήματα") {
+                        handleCourseToggle(checkbox, title);
+                    } else if (currentMode === "Εργαστήρια") {
+                        if (checkbox.checked) handleLabToggle(checkbox, itemObj.original);
+                        else removeLabFromCalendar(title)
+                    } else if (currentMode === "Εξεταστική") {
+                        if (checkbox.checked) addStandaloneExam(itemObj.original);
+                        else removeStandaloneExam(itemObj.original.title);
+                    }
+                }
+
+            });
+        } catch (err) {
+            console.error("Error fetching local search data", err);
+        }
     }
     else {
 
@@ -1428,7 +1404,7 @@ searchbar.addEventListener("keyup", async function (e) {
 filterBtn.addEventListener("click", async function () {
     filterOn = !filterOn; // Enabling/Disabling
 
-    search = searchbar.value;
+    let search = searchbar.value;
 
     const semesters = document.getElementById("semesters"); // Getting the semesters from the documment so we can show or hide them
     const matchingCourses = document.getElementById("matchingCourses") // Getting the new div we made so we can add the matching classes there
@@ -1438,35 +1414,48 @@ filterBtn.addEventListener("click", async function () {
     if (filterOn && !search) {
         filterMenu.style.display = "flex" // Making the menu visible
 
-        // Fetching teachers and rooms
-        const res = await fetch("http://localhost:8000/getTeachersAndRooms", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ mode: currentMode }), // One argument, the mode
-        });
+        // Fetching teachers and rooms from local JSON variables
+        try {
+            let data = currentMode === "Μαθήματα" ? mergedScheduleData : 
+                       currentMode === "Εξεταστική" ? mergedExamsData : mergedLabsData;
+            
+            let teachersArray = [];
+            let roomsArray = [];
 
-        const data = await res.json(); //we save the data here
-        teachersArray = data.teachers//and the teachers in an array
-        roomsArray = data.rooms //and the rooms in an array
+            if (currentMode === "Μαθήματα") {
+                teachersArray = [...new Set(data.map((item) => item.professor).flat())].filter(Boolean);
+                roomsArray = [...new Set(data.map((item) => item.lectureHall).flat())].filter(Boolean); 
+            } else if (currentMode === "Εξεταστική") {
+                roomsArray = [...new Set(data.map((item) => item.lectureHall).flat())].filter(Boolean);
+            } else if (currentMode === "Εργαστήρια") {
+                const allLabHalls = data.flatMap((lab) => lab.data.map((d) => d.labhall));
+                roomsArray = [...new Set(allLabHalls)].filter(Boolean);
+            }
 
-        teachersArray.sort() // Sorting the arrays
-        roomsArray.sort()
+            teachersArray.sort() // Sorting the arrays
+            roomsArray.sort()
 
-        //append each teacher to the box
-        teachersArray.forEach((teacher) => {
-            const option = document.createElement("option");
-            option.value = teacher;
-            option.textContent = teacher;
-            teacherSelect.appendChild(option);
-        });
+            teacherSelect.innerHTML = "<option>Διδάσκων</option>";
+            roomSelect.innerHTML = "<option>Αίθουσα</option>";
 
-        //append each room to the box
-        roomsArray.forEach((room) => {
-            const option = document.createElement("option");
-            option.value = room;
-            option.textContent = room;
-            roomSelect.appendChild(option);
-        });
+            //append each teacher to the box
+            teachersArray.forEach((teacher) => {
+                const option = document.createElement("option");
+                option.value = teacher;
+                option.textContent = teacher;
+                teacherSelect.appendChild(option);
+            });
+
+            //append each room to the box
+            roomsArray.forEach((room) => {
+                const option = document.createElement("option");
+                option.value = room;
+                option.textContent = room;
+                roomSelect.appendChild(option);
+            });
+        } catch (err) {
+             console.error("Error fetching filter data locally:", err);
+        }
     } else {
         if (!search) {
             filterMenu.style.display = "none" // Making the menu invisible
@@ -1490,15 +1479,15 @@ filterBtn.addEventListener("click", async function () {
 
 filterSubmit.addEventListener("click", async function () {
 
-    teacher = teacherSelect.value;
-    room = roomSelect.value;
+    let teacher = teacherSelect.value;
+    let room = roomSelect.value;
 
     if (teacher != "Διδάσκων" || room != "Αίθουσα") {
 
         const semesters = document.getElementById("semesters"); // Getting the semesters from the documment so we can show or hide them
         const matchingCourses = document.getElementById("matchingCourses") // Getting the new div we made so we can add the matching classes there
         const examsBox = document.getElementById("examsBox"); // Also getting the examsbox so we can show or hide it
-        var titlesArray = {} // Creating this here so it can be used in all modes
+        var titlesArray = [] // Creating this here so it can be used in all modes
         const savedClasses = getSavedSchedule(); // Same for this
 
         matchingCourses.innerHTML = ''; // Clearing the previous searches 
@@ -1506,93 +1495,89 @@ filterSubmit.addEventListener("click", async function () {
         semesters.style.display = "none" // We remove the semesters so the sidebar does not get cluttered and ugly
         examsBox.style.display = "none" // Hiding the examsbox
 
-        // Fetching matching classes
-        const res = await fetch("http://localhost:8000/getFiltered", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ teacher: teacher, room: room, mode: currentMode }), // Three arguments, the teacher, the room and the current mode
-        });
-        const data = await res.json(); //we save the data here
-        titlesArray = data.titles //and the titles in an array
+        // Fetching matching classes locally
+        try {
+            let data = currentMode === "Μαθήματα" ? mergedScheduleData : 
+                       currentMode === "Εξεταστική" ? mergedExamsData : mergedLabsData;
+            
+            const filtered = data.filter((item) => {
+                let matchTeacher = true; // Since one of the filters can be blank, we start with "true"
+                let matchRoom = true;
 
-
-        // In case the search mathes no title we inform the user by creating a div containing a message
-        if (titlesArray.length === 0) {
-            const div = document.createElement("div");
-
-            div.style.textAlign = "center"
-
-            const p = document.createElement("p");
-            p.textContent = "Δεν βρέθηκε μάθημα που να αντιστοιχεί σε '" + String(teacher) + " και " + String(room) + " :(";
-            p.style.color = "white"
-            p.style.fontFamily = "sans-serif"
-
-            div.append(p);
-            matchingCourses.appendChild(div);
-
-            return // We stop the function from doing anything else
-        }
-
-        //creates for each title in title array a div with a pargaraph and a checkbox in it so it generates everything dinamicly
-        titlesArray.forEach((title, i) => {
-            const div = document.createElement("div");
-            div.className = "course";
-
-            const p = document.createElement("p");
-            p.textContent = title;
-
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.className = "checkbox";
-            checkbox.checked = savedClasses.some(
-                (saved) => saved.title === title,
-            );
-
-            div.append(p, checkbox);
-            matchingCourses.appendChild(div);
-
-            setTimeout(() => div.classList.add("visible"), i * 50);
-
-            div.onclick = (e) => {
-                //ckeckbox logic on the div
-                if (checkbox.disabled || e.target === checkbox) return;
-                checkbox.checked = !checkbox.checked;
-                checkbox.dispatchEvent(new Event("change"));
-            };
-
-            checkbox.onchange = async () => {
                 if (currentMode === "Μαθήματα") {
-                    handleCourseToggle(checkbox, title);
-                } else if (currentMode === "Εργαστήρια") {
-
-                    const res = await fetch("http://localhost:8000/getLab", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ title: title })
-                    })
-                    const lab = await res.json();
-
-                    if (checkbox.checked) handleLabToggle(checkbox, lab);
-                    else removeLabFromCalendar(title)
+                    if (teacher != "Διδάσκων") { matchTeacher = item.professor && item.professor.includes(teacher); }
+                    if (room != "Αίθουσα") { matchRoom = item.lectureHall && item.lectureHall.includes(room); }
                 } else if (currentMode === "Εξεταστική") {
-                   
-                    const res = await fetch("http://localhost:8000/getExam", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ title: title })
-                    })
-
-                    const examData = await res.json();
-               
-
-                    if (checkbox.checked) addStandaloneExam(examData.exam);
-                    else removeStandaloneExam(examData.exam.title);
-
+                    if (room != "Αίθουσα") { matchRoom = item.lectureHall && item.lectureHall.includes(room); }
+                } else if (currentMode === "Εργαστήρια") {
+                    if (room != "Αίθουσα") { matchRoom = item.data && item.data.some((d) => d.labhall === room); }
                 }
+                return matchTeacher && matchRoom;
+            });
 
+            titlesArray = filtered.map((item) => ({ title: item.title || item.name, original: item }));
+
+
+            // In case the search mathes no title we inform the user by creating a div containing a message
+            if (titlesArray.length === 0) {
+                const div = document.createElement("div");
+
+                div.style.textAlign = "center"
+
+                const p = document.createElement("p");
+                p.textContent = "Δεν βρέθηκε μάθημα που να αντιστοιχεί σε '" + String(teacher) + " και " + String(room) + " :(";
+                p.style.color = "white"
+                p.style.fontFamily = "sans-serif"
+
+                div.append(p);
+                matchingCourses.appendChild(div);
+
+                return // We stop the function from doing anything else
             }
 
-        });
+            //creates for each title in title array a div with a pargaraph and a checkbox in it so it generates everything dinamicly
+            titlesArray.forEach((itemObj, i) => {
+                let title = itemObj.title;
+                const div = document.createElement("div");
+                div.className = "course";
+
+                const p = document.createElement("p");
+                p.textContent = title;
+
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.className = "checkbox";
+                checkbox.checked = savedClasses.some(
+                    (saved) => saved.title === title,
+                );
+
+                div.append(p, checkbox);
+                matchingCourses.appendChild(div);
+
+                setTimeout(() => div.classList.add("visible"), i * 50);
+
+                div.onclick = (e) => {
+                    //ckeckbox logic on the div
+                    if (checkbox.disabled || e.target === checkbox) return;
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event("change"));
+                };
+
+                checkbox.onchange = async () => {
+                    if (currentMode === "Μαθήματα") {
+                        handleCourseToggle(checkbox, title);
+                    } else if (currentMode === "Εργαστήρια") {
+                        if (checkbox.checked) handleLabToggle(checkbox, itemObj.original);
+                        else removeLabFromCalendar(title)
+                    } else if (currentMode === "Εξεταστική") {
+                        if (checkbox.checked) addStandaloneExam(itemObj.original);
+                        else removeStandaloneExam(itemObj.original.title);
+                    }
+                }
+            });
+        } catch (err) {
+            console.error("Error fetching local filtered data:", err);
+        }
 
     }
     else if (teacher === "Διδάσκων" || room === "Αίθουσα") {

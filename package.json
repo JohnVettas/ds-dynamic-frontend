@@ -3,14 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-  "start": "parcel public/*.html",
-  "build": "parcel build public/*.html --public-url ./"},
+    "start": "parcel public/*.html",
+    "build": "parcel build public/*.html --public-url ./"
+  },
   "keywords": [],
   "homepage": "https://JohnVettas.github.io/ds-dynamic-frontend/",
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "parcel": "^2.16.4"
+    "parcel": "^2.16.4",
+    "parcel-reporter-static-files-copy": "^1.5.3"
   }
 }
