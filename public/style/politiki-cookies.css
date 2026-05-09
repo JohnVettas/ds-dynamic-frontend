@@ -91,9 +91,9 @@ body {
     pointer-events: none;
 }
 
-.slider img {
-    width: 25px;
-    height: 25px;
+#sun, #moon {
+    width: 20px;
+    height: 20px;
 }
 
 #dark-mode-toggle {
