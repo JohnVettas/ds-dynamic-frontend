@@ -8,9 +8,9 @@ const mergedLabsData = require('../static/jsonData/merged_labs.json');
 
 // Optional files - catch errors if they don't exist yet
 let semesterExamsData = null, makeUpExamsData = null, septemberExamsData = null;
-try { semesterExamsData = require('../static/jsonData/semester_exams.json'); } catch(e) {}
-try { makeUpExamsData = require('../static/jsonData/make_up_exams.json'); } catch(e) {}
-try { septemberExamsData = require('../static/jsonData/september_exams.json'); } catch(e) {}
+try { semesterExamsData = require('../static/jsonData/semester_exams.json'); } catch (e) { }
+try { makeUpExamsData = require('../static/jsonData/make_up_exams.json'); } catch (e) { }
+try { septemberExamsData = require('../static/jsonData/september_exams.json'); } catch (e) { }
 
 
 //GLOBAL VARIABLES
@@ -178,8 +178,8 @@ async function fetchCourseData(title) {
 async function fetchExamData(title) {
     try {
         const baseTitle = title.split("(")[0].trim();
-        const examData = mergedExamsData.find((exam) => exam.title === title) || 
-                         mergedExamsData.find((exam) => exam.title === baseTitle);
+        const examData = mergedExamsData.find((exam) => exam.title === title) ||
+            mergedExamsData.find((exam) => exam.title === baseTitle);
 
         return examData || null;
     } catch (e) {
@@ -403,8 +403,10 @@ document.querySelectorAll('input[name="choice"]').forEach((radio) => {
             let targetDiv = document.getElementById(`Semester${sem}`);
             if (targetDiv) targetDiv.innerHTML = ""; // Empty the list
 
-            let arrow = btn.querySelector(".pointer");
-            if (arrow) arrow.src = "images/right_pointer.svg";
+            let arrow = btn.querySelector(".pointer path");
+            if (arrow) {
+                arrow.setAttribute('d', 'M9.5 7L14.5 12L9.5 17');
+            }
             btn.dataset.open = "false"; // Reset our tracking variable
         });
 
@@ -435,7 +437,7 @@ function updateCourseColor(subjectTitle, newColor) {
     calendar.getEvents().forEach((e) => {
         const eventSubject =
             e.extendedProps.subjectTitle;
-             //I think this is supposed to change the colors of courses as well as the exam course but
+        //I think this is supposed to change the colors of courses as well as the exam course but
         if (eventSubject === subjectTitle) {
             //I don't think it works corectly because it uses forEach .getEvent that only takes events currently on screen
             e.setProp("backgroundColor", newColor);
@@ -832,7 +834,7 @@ document.querySelectorAll(".buttonDiv").forEach((button) => {
 
     let cleanText = button.textContent.trim();
     let sem = button.parentElement.dataset.semester || cleanText[cleanText.length - 1];
-    let arrow = button.querySelector(".pointer");
+    let arrow = button.querySelector(".pointer path");
     const SemesterDiv = document.getElementById(`Semester${sem}`);
 
     button.onclick = async function () {
@@ -840,9 +842,14 @@ document.querySelectorAll(".buttonDiv").forEach((button) => {
         isOpen = !isOpen;
         button.dataset.open = isOpen.toString();
 
-        arrow.src = isOpen
-    ? new URL('images/down_pointer.svg', import.meta.url)
-    : new URL('images/right_pointer.svg', import.meta.url);
+        if (arrow) {
+            // the d attribute for down and right arrow
+            const downPath = "M7 9.5L12 14.5L17 9.5";
+            const rightPath = "M9.5 7L14.5 12L9.5 17";
+
+            // if isOpen then we use the down d attribute, otherwise the right d attribute 
+            arrow.setAttribute('d', isOpen ? downPath : rightPath);
+        }
 
         if (!isOpen) {
             SemesterDiv.innerHTML = ``;
@@ -1229,7 +1236,7 @@ function checkDisclaimer() {
 }
 
 // Add "window." to make it globally visible
-window.acceptDisclaimer = function() {
+window.acceptDisclaimer = function () {
     document.cookie = "legalAcceptedSession=true; path=/; SameSite=Lax";
 
     const banner = document.getElementById("legal-disclaimer");
@@ -1289,7 +1296,7 @@ addEventListener("resize", () => {
         resize();
         resizeWrapper();
     }
-    
+
 });
 
 // Event listener for the searchbar
@@ -1316,13 +1323,13 @@ searchbar.addEventListener("keyup", async function (e) {
 
         // Fetching matching classes from local JSON variables
         try {
-            let data = currentMode === "Μαθήματα" ? mergedScheduleData : 
-                       currentMode === "Εξεταστική" ? mergedExamsData : mergedLabsData;
-            
+            let data = currentMode === "Μαθήματα" ? mergedScheduleData :
+                currentMode === "Εξεταστική" ? mergedExamsData : mergedLabsData;
+
             const titles = data
                 .filter((item) => String(item.title || item.name).toUpperCase().includes(String(search).toUpperCase()))
                 .map((item) => ({ title: item.title || item.name, original: item }));
-                
+
             titlesArray = titles.map((course) => course.title);
 
             // In case the search mathes no title we inform the user by creating a div containing a message
@@ -1417,15 +1424,15 @@ filterBtn.addEventListener("click", async function () {
 
         // Fetching teachers and rooms from local JSON variables
         try {
-            let data = currentMode === "Μαθήματα" ? mergedScheduleData : 
-                       currentMode === "Εξεταστική" ? mergedExamsData : mergedLabsData;
-            
+            let data = currentMode === "Μαθήματα" ? mergedScheduleData :
+                currentMode === "Εξεταστική" ? mergedExamsData : mergedLabsData;
+
             let teachersArray = [];
             let roomsArray = [];
 
             if (currentMode === "Μαθήματα") {
                 teachersArray = [...new Set(data.map((item) => item.professor).flat())].filter(Boolean);
-                roomsArray = [...new Set(data.map((item) => item.lectureHall).flat())].filter(Boolean); 
+                roomsArray = [...new Set(data.map((item) => item.lectureHall).flat())].filter(Boolean);
             } else if (currentMode === "Εξεταστική") {
                 roomsArray = [...new Set(data.map((item) => item.lectureHall).flat())].filter(Boolean);
             } else if (currentMode === "Εργαστήρια") {
@@ -1455,7 +1462,7 @@ filterBtn.addEventListener("click", async function () {
                 roomSelect.appendChild(option);
             });
         } catch (err) {
-             console.error("Error fetching filter data locally:", err);
+            console.error("Error fetching filter data locally:", err);
         }
     } else {
         if (!search) {
@@ -1498,9 +1505,9 @@ filterSubmit.addEventListener("click", async function () {
 
         // Fetching matching classes locally
         try {
-            let data = currentMode === "Μαθήματα" ? mergedScheduleData : 
-                       currentMode === "Εξεταστική" ? mergedExamsData : mergedLabsData;
-            
+            let data = currentMode === "Μαθήματα" ? mergedScheduleData :
+                currentMode === "Εξεταστική" ? mergedExamsData : mergedLabsData;
+
             const filtered = data.filter((item) => {
                 let matchTeacher = true; // Since one of the filters can be blank, we start with "true"
                 let matchRoom = true;
