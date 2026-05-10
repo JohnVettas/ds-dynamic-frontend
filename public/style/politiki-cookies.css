@@ -227,6 +227,15 @@ body.dark-theme .dropdown-checkbox {
     color: #ccc;
 }
 
+
+a {
+    color: #000000 !important; 
+}
+
+body.dark-theme a {
+    color: #ffffff !important; 
+}
+
 body.dark-theme .top-notice,
 body.dark-theme table th, 
 body.dark-theme table td {

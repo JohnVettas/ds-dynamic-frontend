@@ -278,6 +278,14 @@ body.dark-theme .slider {
     background-color: #1a1a40;
 }
 
+a {
+    color: #000000 !important; 
+}
+
+body.dark-theme a {
+    color: #ffffff !important; 
+}
+
 
 #moon { display: none; }
 body.dark-theme #moon { display: block; }
