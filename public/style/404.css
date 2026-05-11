@@ -290,3 +290,56 @@ body.dark-theme a {
 #moon { display: none; }
 body.dark-theme #moon { display: block; }
 body.dark-theme #sun { display: none; }
+
+/* --- MOBILE RESPONSIVE --- */
+@media (max-width: 768px) {
+    .unipi-header {
+        height: auto;
+        flex-direction: column;
+        padding: 15px 10px;
+        gap: 15px;
+    }
+
+    .header-left {
+        align-self: flex-start; 
+        margin-left: -10px; 
+    }
+
+    #unipi-logo {
+        height: auto;
+        max-height: 90px !important; 
+        max-width: 100%;
+    }
+
+    .header-center, 
+    .duck-text, 
+    #btn-toggle {
+        transform: none !important;
+        margin: 0 !important;
+    }
+
+    .header-center {
+        width: 100%;
+        gap: 8px;
+    }
+
+    .dropdown {
+        top: 25px;
+        right: 15px;
+        transform: none;
+    }
+
+    .error-box {
+        padding: 40px 20px;
+        width: 80%;
+    }
+
+    .error-box h1 {
+        font-size: 5rem;
+    }
+
+    #Ducky {
+        top: 50% !important; 
+        transform: translate(-50%, 30px) !important;
+    }
+}

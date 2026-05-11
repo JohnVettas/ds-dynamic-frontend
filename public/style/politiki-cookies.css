@@ -261,3 +261,58 @@ body.dark-theme .slider {
 
 body.dark-theme #moon { display: block; }
 body.dark-theme #sun { display: none; }
+
+/* --- MOBILE RESPONSIVE --- */
+@media (max-width: 768px) {
+    .unipi-header {
+        height: 85px; 
+        padding: 0 15px 0 0; 
+    }
+
+    .header-left {
+        margin-left: 0; 
+        height: 100%; 
+    }
+
+    #unipi-logo {
+        height: 100% !important; 
+        width: auto !important;
+        max-width: none !important; 
+    }
+
+    #settings {
+        height: 30px !important; 
+        width: auto;
+    }
+
+    .dropdown {
+        position: absolute;
+        right: 15px; 
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    body, html {
+        overflow-x: hidden; 
+    }
+
+    main {
+        padding: 20px 15px; 
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    main > div {
+        width: 100%;
+        box-sizing: border-box;
+        overflow-wrap: break-word; 
+        word-wrap: break-word;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        width: 100%;
+    }
+}
