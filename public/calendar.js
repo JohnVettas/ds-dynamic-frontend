@@ -1,28 +1,36 @@
-// --- JSON IMPORTS ---
-const teachersData = require('../static/jsonData/teachers.json');
-const academicCalendarData = require('../static/jsonData/academic_calendar.json');
-const coursesData = require('../static/jsonData/courses.json');
-const mergedScheduleData = require('../static/jsonData/merged_schedule.json');
-const mergedExamsData = require('../static/jsonData/merged_exams.json');
-const mergedLabsData = require('../static/jsonData/merged_labs.json');
+// --- UNIFIED MASTER DATA IMPORT ---
+const allData = require('../static/jsonData/allData.json');
 
-// Optional files - catch errors if they don't exist yet
-let semesterExamsData = null, makeUpExamsData = null, septemberExamsData = null;
-try { semesterExamsData = require('../static/jsonData/semester_exams.json'); } catch (e) { }
-try { makeUpExamsData = require('../static/jsonData/make_up_exams.json'); } catch (e) { }
-try { septemberExamsData = require('../static/jsonData/september_exams.json'); } catch (e) { }
+// Safely destructure variables out of the unified master JSON with fallbacks
+const {
+    teachers: teachersData = {},
+    academicCalendar: academicCalendarData = null,
+    courses: coursesData = {},
+    schedule: mergedScheduleData = [],
+    exams: mergedExamsData = [],
+    labs: mergedLabsData = []
+} = allData;
 
+// Handle optional sets extracted out of your sub-modules or fallback gracefully
+let semesterExamsData = allData.semesterExams || null;
+let makeUpExamsData = allData.makeUpExams || null;
+let septemberExamsData = allData.septemberExams || null;
 
 //GLOBAL VARIABLES
 let calendar;
-let academicData = null;
+let academicData = academicCalendarData; // Directly assign from master object
 let eventTracker = {};
 let currentMode = "Μαθήματα"; //hardcode the default radio button
-let professorLinks = {};
-let titleLinks = {};
+let professorLinks = teachersData;      // Directly assign from master object
+let titleLinks = coursesData;          // Directly assign from master object
 let normalizedTitleLinks = {};
 let isSeptember = false;
 let filterOn = false; // Filtering is disabled at the start
+
+// Automatically pre-populate your normalized titles map right at startup
+Object.entries(titleLinks).forEach(([title, url]) => {
+    normalizedTitleLinks[normalizeTitleName(title)] = url;
+});
 
 //DOM ELEMENTS
 const popup = document.getElementById("eventPopup"); //pop up for when you click on an event
@@ -115,34 +123,7 @@ const daysMapGreek = {
     "7": "Κυριακή"
 };
 
-//API FETCHERS (Now using locally required variables)
-async function fetchAcademicData() {
-    try {
-        academicData = academicCalendarData;
-    } catch (err) {
-        console.error("Error loading local JSON:", err);
-    }
-}
-
-async function fetchProfessorLinks() {
-    try {
-        professorLinks = teachersData;
-    } catch (err) {
-        console.error("Error loading professor links:", err);
-    }
-}
-
-async function fetchTitleLinks() {
-    try {
-        titleLinks = coursesData;
-
-        Object.entries(titleLinks).forEach(([title, url]) => {
-            normalizedTitleLinks[normalizeTitleName(title)] = url;
-        });
-    } catch (err) {
-        console.error("Error loading courses:", err);
-    }
-}
+// REMOVED: Legacy API FETCHERS (Data is loaded synchronous globally up at the top)
 
 async function fetchCourseData(title) {
     try {
@@ -302,7 +283,7 @@ async function examOptions() {
 
     let isWinter = false;
 
-    // Determine winter semester status from required JSONs
+    // Determine winter semester status from unified JSON properties
     if (semesterExamsData && Array.isArray(semesterExamsData) && semesterExamsData.length > 0 && semesterExamsData[0].semester) {
         isWinter = semesterExamsData[0].semester % 2 !== 0;
     } else if (makeUpExamsData && Array.isArray(makeUpExamsData) && makeUpExamsData.length > 0 && makeUpExamsData[0].semester) {
@@ -735,9 +716,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     calendar.render(); //Makes calendar visible
-    await fetchAcademicData();
-    await fetchProfessorLinks();
-    await fetchTitleLinks();
 
     // Populate Holidays, this code gives names, dates and data to the holidays
     if (academicData?.holidays) {
@@ -772,6 +750,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         addStandaloneExam(examData);
     }
 
+    // Load saved labs
     const savedLabs = getSavedLabs();
     for (const lab of savedLabs) {
         addSpecificLabToCalendar(lab.name, lab.slot, lab.sem, lab.color, true);
@@ -860,7 +839,7 @@ document.querySelectorAll(".buttonDiv").forEach((button) => {
         let isLabMode = currentMode === "Εργαστήρια";
         let isExamMode = currentMode === "Εξεταστική";
 
-        //FETCH DATA BASED ON MODE DIRECTLY FROM LOCAL VARIABLES
+        //FETCH DATA BASED ON MODE DIRECTLY FROM LOCAL MASTER COMPILING VARIABLES
         try {
             if (currentMode === "Μαθήματα") {
                 const data = mergedScheduleData;
@@ -1011,8 +990,6 @@ document.querySelectorAll(".buttonDiv").forEach((button) => {
 });
 
 //ICS EXPORT
-//this is the dark side of our code, we dont know exacty how it works but it uses the library https://github.com/nwcell/ics.js/ to make a ics file
-//for the rest of this function gemini added the comments because I dont understand it
 function downloadCalendar() {
     // 1. Initialize the ICS generator and get all current calendar events
     const cal = ics();
@@ -1160,9 +1137,6 @@ function downloadCalendar() {
     document.body.removeChild(link); // Clean up the link afterward
 }
 
-//now back to human comments :)
-
-//this is the visual (the gay part) of our js code
 //this function hides the list of semesters on the right hand side
 function hideList() {
     if (window.innerWidth <= 767) return toggleScreenBtn?.click();
@@ -1188,6 +1162,7 @@ toggleScreenBtn.onclick = function () {
 //this just resizes the calendar (refresh's it)
 function resize() {
     const sidebar = document.getElementById("semesterWrapper");
+    if (!sidebar) return;
     sidebar.style.height = "unset";
     sidebar.style.height = getComputedStyle(
         document.getElementById("calendar"),
@@ -1216,7 +1191,6 @@ function resizeWrapper() {
 }
 
 // --- Legal Disclaimer Logic με Session Cookie ---
-// make cookie for legal things maybe 
 function getCookie(name) {
     let nameEQ = name + "=";
     let ca = document.cookie.split(';');
@@ -1235,7 +1209,6 @@ function checkDisclaimer() {
     }
 }
 
-// Add "window." to make it globally visible
 window.acceptDisclaimer = function () {
     document.cookie = "legalAcceptedSession=true; path=/; SameSite=Lax";
 
@@ -1296,7 +1269,6 @@ addEventListener("resize", () => {
         resize();
         resizeWrapper();
     }
-
 });
 
 // Event listener for the searchbar
@@ -1309,9 +1281,7 @@ searchbar.addEventListener("keyup", async function (e) {
     var titlesArray = [] // Creating this here so it can be used in all modes
     const savedClasses = getSavedSchedule(); // Same for this
 
-    // If it is not null we move on to show the user the matched courses
     if (search) {
-        // If the filter menu is visible we hide it
         if (filterOn) {
             filterOn = !filterOn;
             filterMenu.style.display = "none"
@@ -1321,7 +1291,6 @@ searchbar.addEventListener("keyup", async function (e) {
         semesters.style.display = "none" // We remove the semesters so the sidebar does not get cluttered and ugly
         examsBox.style.display = "none" // Hiding the examsbox
 
-        // Fetching matching classes from local JSON variables
         try {
             let data = currentMode === "Μαθήματα" ? mergedScheduleData :
                 currentMode === "Εξεταστική" ? mergedExamsData : mergedLabsData;
@@ -1332,10 +1301,8 @@ searchbar.addEventListener("keyup", async function (e) {
 
             titlesArray = titles.map((course) => course.title);
 
-            // In case the search mathes no title we inform the user by creating a div containing a message
             if (titlesArray.length === 0) {
                 const div = document.createElement("div");
-
                 div.style.textAlign = "center"
 
                 const p = document.createElement("p");
@@ -1345,11 +1312,9 @@ searchbar.addEventListener("keyup", async function (e) {
 
                 div.append(p);
                 matchingCourses.appendChild(div);
-
-                return // We stop the function from doing anything else
+                return;
             }
 
-            //creates for each title in title array a div with a pargaraph and a checkbox in it so it generates everything dinamicly
             titles.forEach((itemObj, i) => {
                 let title = itemObj.title;
                 const div = document.createElement("div");
@@ -1371,7 +1336,6 @@ searchbar.addEventListener("keyup", async function (e) {
                 setTimeout(() => div.classList.add("visible"), i * 50);
 
                 div.onclick = (e) => {
-                    //ckeckbox logic on the div
                     if (checkbox.disabled || e.target === checkbox) return;
                     checkbox.checked = !checkbox.checked;
                     checkbox.dispatchEvent(new Event("change"));
@@ -1388,26 +1352,21 @@ searchbar.addEventListener("keyup", async function (e) {
                         else removeStandaloneExam(itemObj.original.title);
                     }
                 }
-
             });
         } catch (err) {
             console.error("Error fetching local search data", err);
         }
     }
     else {
-
         matchingCourses.innerHTML = ''; // Clearing the previous search results
         if (currentMode === "Εξεταστική") {
-            examsBox.style.display = "flex" // if we're in exam mode we also show the examsbox
+            examsBox.style.display = "flex"
         }
-        // Only bringing these back if we are not in exam mode since the user needs to choose make up exams or normal exams for the semesters to show up
         else {
-            semesters.style.display = "block" // If the searchbar is null then the semesters reappear
-
+            semesters.style.display = "block"
         }
     }
-
-})
+});
 
 filterBtn.addEventListener("click", async function () {
     filterOn = !filterOn; // Enabling/Disabling
@@ -1418,11 +1377,9 @@ filterBtn.addEventListener("click", async function () {
     const matchingCourses = document.getElementById("matchingCourses") // Getting the new div we made so we can add the matching classes there
     const examsBox = document.getElementById("examsBox"); // Also getting the examsbox so we can show or hide it
 
-    // Only showing the menu if the searchbar is empty to avoid conflicts and making a mess in the sidebar
     if (filterOn && !search) {
         filterMenu.style.display = "flex" // Making the menu visible
 
-        // Fetching teachers and rooms from local JSON variables
         try {
             let data = currentMode === "Μαθήματα" ? mergedScheduleData :
                 currentMode === "Εξεταστική" ? mergedExamsData : mergedLabsData;
@@ -1472,26 +1429,20 @@ filterBtn.addEventListener("click", async function () {
 
             matchingCourses.innerHTML = ''; // Clearing the previous search results
             if (currentMode === "Εξεταστική") {
-                examsBox.style.display = "flex" // if we're in exam mode we also show the examsbox
+                examsBox.style.display = "flex"
             }
-            // Only bringing these back if we are not in exam mode since the user needs to choose make up exams or normal exams for the semesters to show up
             else {
-                semesters.style.display = "block" // bring back the semesters
-
+                semesters.style.display = "block"
             }
         }
     }
-
-
-})
+});
 
 filterSubmit.addEventListener("click", async function () {
-
     let teacher = teacherSelect.value;
     let room = roomSelect.value;
 
     if (teacher != "Διδάσκων" || room != "Αίθουσα") {
-
         const semesters = document.getElementById("semesters"); // Getting the semesters from the documment so we can show or hide them
         const matchingCourses = document.getElementById("matchingCourses") // Getting the new div we made so we can add the matching classes there
         const examsBox = document.getElementById("examsBox"); // Also getting the examsbox so we can show or hide it
@@ -1503,7 +1454,6 @@ filterSubmit.addEventListener("click", async function () {
         semesters.style.display = "none" // We remove the semesters so the sidebar does not get cluttered and ugly
         examsBox.style.display = "none" // Hiding the examsbox
 
-        // Fetching matching classes locally
         try {
             let data = currentMode === "Μαθήματα" ? mergedScheduleData :
                 currentMode === "Εξεταστική" ? mergedExamsData : mergedLabsData;
@@ -1525,11 +1475,8 @@ filterSubmit.addEventListener("click", async function () {
 
             titlesArray = filtered.map((item) => ({ title: item.title || item.name, original: item }));
 
-
-            // In case the search mathes no title we inform the user by creating a div containing a message
             if (titlesArray.length === 0) {
                 const div = document.createElement("div");
-
                 div.style.textAlign = "center"
 
                 const p = document.createElement("p");
@@ -1539,11 +1486,9 @@ filterSubmit.addEventListener("click", async function () {
 
                 div.append(p);
                 matchingCourses.appendChild(div);
-
-                return // We stop the function from doing anything else
+                return;
             }
 
-            //creates for each title in title array a div with a pargaraph and a checkbox in it so it generates everything dinamicly
             titlesArray.forEach((itemObj, i) => {
                 let title = itemObj.title;
                 const div = document.createElement("div");
@@ -1565,7 +1510,6 @@ filterSubmit.addEventListener("click", async function () {
                 setTimeout(() => div.classList.add("visible"), i * 50);
 
                 div.onclick = (e) => {
-                    //ckeckbox logic on the div
                     if (checkbox.disabled || e.target === checkbox) return;
                     checkbox.checked = !checkbox.checked;
                     checkbox.dispatchEvent(new Event("change"));
@@ -1586,7 +1530,6 @@ filterSubmit.addEventListener("click", async function () {
         } catch (err) {
             console.error("Error fetching local filtered data:", err);
         }
-
     }
     else if (teacher === "Διδάσκων" || room === "Αίθουσα") {
         filterMenu.style.display = "none" // Making the menu invisible
@@ -1595,31 +1538,24 @@ filterSubmit.addEventListener("click", async function () {
 
         matchingCourses.innerHTML = ''; // Clearing the previous search results
         if (currentMode === "Εξεταστική") {
-            examsBox.style.display = "flex" // if we're in exam mode we also show the examsbox
+            examsBox.style.display = "flex"
         }
-        // Only bringing these back if we are not in exam mode since the user needs to choose make up exams or normal exams for the semesters to show up
         else {
-            semesters.style.display = "block" // bring back the semesters
-
+            semesters.style.display = "block"
         }
     }
-
-})
-
+});
 
 const darkModeToggle = document.getElementById("dark-mode-toggle");
 
 if (darkModeToggle) {
-    // Check what the user saved last time they visited
     const savedTheme = localStorage.getItem("userTheme");
 
-    // If they saved "dark", apply the theme AND check the box
     if (savedTheme === "dark") {
         document.body.classList.add("dark-theme");
         darkModeToggle.checked = true;
     }
 
-    // Listen for clicks and save the new choice
     darkModeToggle.addEventListener("change", function (event) {
         if (event.target.checked) {
             document.body.classList.add("dark-theme");
