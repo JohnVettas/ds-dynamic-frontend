@@ -182,6 +182,50 @@ main {
 }
 
 
+/* Container positioned inside the flex toolbar */
+.calendar-settings-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 15px; /* Spacing from the other calendar buttons */
+}
+
+/* Base Light Mode Icon Color */
+#settings path {
+    stroke: #2f385f; 
+}
+
+/* Dark Mode Icon Color */
+body.dark-theme #settings path {
+    stroke: #ffffff !important;
+}
+
+/* Fix Dropdown Positioning inside the header */
+/* Fix Dropdown Positioning inside the header */
+.dropdown-content {
+    display: none;
+    position: absolute; 
+    top: 100%; 
+    left: 0;       /* Align to the left edge of the icon */
+    right: auto;   /* THIS IS THE FIX: Clears any old "right: 0" rules */
+    margin-top: 10px;
+    background-color: white;
+    min-width: 200px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    z-index: 9999; 
+    overflow: hidden;
+}
+
+/* Ensure the SVG itself has the correct dimensions */
+#settings {
+    height: 35px;
+    width: 35px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+
 /* Visible course (animation state) */
 .course.visible {
     opacity: 1;
@@ -212,7 +256,8 @@ footer {
 
 /* Calendar slot height */
 .fc-timegrid-slot {
-    height: max(4vh, 2.5em) !important;
+    /* clamp(MINIMUM, PREFERRED, MAXIMUM) */
+    height: clamp(2.5em, 4vh, 60px) !important; 
 }
 
 /* Logo image */
@@ -626,19 +671,6 @@ footer {
 }
 
 /* 3. The actual menu (same as before, but aligns perfectly now) */
-.dropdown-content {
-  display: none; /* Hidden by default */
-  position: absolute; 
-  top: 100%; /* Pushes it exactly below the image */
-  right: 0; /* Aligns the menu to the right edge of the icon */
-  background-color: white;
-  min-width: 150px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  border-radius: 8px;
-  z-index: 100;
-  overflow: hidden;
-  margin-top: 10px; /* Optional: adds a little breathing room below the icon */
-}
 
 /* Styling for the links inside the menu */
 .dropdown-content a {

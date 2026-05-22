@@ -717,6 +717,15 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     calendar.render(); //Makes calendar visible
 
+    const leftToolbar = document.querySelector('.fc-header-toolbar .fc-toolbar-chunk:first-child');
+    const settingsWrapper = document.getElementById('settings-wrapper');
+    
+    if (leftToolbar && settingsWrapper) {
+        leftToolbar.style.display = 'flex';
+        leftToolbar.style.alignItems = 'center';
+        leftToolbar.appendChild(settingsWrapper);
+    }
+
     // Populate Holidays, this code gives names, dates and data to the holidays
     if (academicData?.holidays) {
         academicData.holidays.forEach((holiday) => {
