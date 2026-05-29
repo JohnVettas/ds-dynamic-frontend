@@ -1614,3 +1614,11 @@ if (darkModeToggle) {
         }
     });
 }
+
+teacherSelect.onchange = () => {
+    filterSubmit.click();
+};
+
+roomSelect.onchange = () => {
+    filterSubmit.click();
+};
