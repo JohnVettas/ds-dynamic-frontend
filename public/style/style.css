@@ -205,10 +205,10 @@ body.dark-theme #settings path {
 .dropdown-content {
     display: none;
     position: absolute; 
-    top: 100%; 
+    bottom: 100%; 
     left: 0;       /* Align to the left edge of the icon */
     right: auto;   /* THIS IS THE FIX: Clears any old "right: 0" rules */
-    margin-top: 10px;
+    margin-bottom: 10px;
     background-color: white;
     min-width: 200px;
     box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
@@ -302,16 +302,19 @@ footer {
 
 .fc-viewBtn-button {
     height: 40px;
-    width: 107px;
+}
+
+.fc-viewBtn-button {
+    margin-left: 10px !important;
 }
 
 /* Bottom button container */
 #clearDiv {
     display: flex;
-    flex-direction: column;
+    /* flex-direction: column; */
     align-items: center;
     gap: 10px;
-    padding: 20px 10px;
+    padding: 20px 20px;
     background-color: rgb(107, 6, 6);
     width: 100%;
     margin-top: auto;
@@ -349,21 +352,32 @@ footer {
 
 /* Sidebar wrapper container */
 #semesterWrapper {
-    transform-origin: top;
-    animation: shutterOpen 0.5s ease-out forwards;
-    overflow: hidden;
     background-color: rgb(107, 6, 6);
     display: flex;
     flex-direction: column;
-    /* height: 1140px; */
     overflow-y: auto;
 
-
     width: 280px;
-    /* Sets the default starting width */
     min-width: 150px;
-    /* Allows it to shrink more */
 
+    transform: translateX(0);
+    opacity: 1;
+
+    transition:
+        transform 0.35s ease,
+        opacity 0.35s ease,
+        width 0.35s ease,
+        min-width 0.35s ease;
+}
+
+#semesterWrapper.closed {
+    transform: translateX(-100%);
+    opacity: 0;
+
+    width: 0;
+    min-width: 0;
+
+    overflow: hidden;
 }
 
 /* Box containing the radiobuttons */
@@ -964,12 +978,16 @@ body.dark-theme .dropdown-checkbox:hover {
 /* Small screens layout */
 @media (max-width: 485px) {
 
+
+    .fc .fc-toolbar-chunk:first-child {
+        width: 100%;
+    }
+
     .fc-toolbar-chunk:nth-child(3) {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
         grid-template-areas:
-            "view download"
-            "today next_prev";
+            "download today next_prev";
         gap: 10px;
     }
 

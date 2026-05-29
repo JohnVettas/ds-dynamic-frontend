@@ -692,12 +692,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         buttonText: { today: "Σήμερα" },
         customButtons: {
             downloadBtn: { text: "Λήψη (ICS)", click: downloadCalendar },
-            viewBtn: { text: "Εξάμηνα", click: hideList },
+            viewBtn: { text: "", click: hideList },
         },
         headerToolbar: {
-            left: "",
+            left: "viewBtn",
             center: "title",
-            right: "downloadBtn today prev,next viewBtn",
+            right: "downloadBtn today prev,next",
         },
         eventClick: handleEventClick,
         eventDidMount: function (info) {
@@ -713,18 +713,33 @@ document.addEventListener("DOMContentLoaded", async function () {
             });
             if (isOnHoliday) info.el.style.display = "none";
         },
+
     });
 
     calendar.render(); //Makes calendar visible
 
-    const leftToolbar = document.querySelector('.fc-header-toolbar .fc-toolbar-chunk:first-child');
-    const settingsWrapper = document.getElementById('settings-wrapper');
-    
-    if (leftToolbar && settingsWrapper) {
-        leftToolbar.style.display = 'flex';
-        leftToolbar.style.alignItems = 'center';
-        leftToolbar.appendChild(settingsWrapper);
-    }
+    document.querySelector(".fc-viewBtn-button").innerHTML = `
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 18L20 18" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+            
+            <path d="M4 12L20 12" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+            
+            <path d="M4 6L20 6" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        `;
+
+    // const leftToolbar = document.querySelector('.fc-header-toolbar .fc-toolbar-chunk:first-child');
+    // const settingsWrapper = document.getElementById('settings-wrapper');
+
+    // if (leftToolbar && settingsWrapper) {
+    //     leftToolbar.style.display = 'flex';
+    //     leftToolbar.style.alignItems = 'center';
+    //     leftToolbar.appendChild(settingsWrapper);
+    // }
 
     // Populate Holidays, this code gives names, dates and data to the holidays
     if (academicData?.holidays) {
@@ -1147,12 +1162,22 @@ function downloadCalendar() {
 }
 
 //this function hides the list of semesters on the right hand side
+
 function hideList() {
-    if (window.innerWidth <= 767) return toggleScreenBtn?.click();
+
+    if (window.innerWidth <= 767) {
+        return toggleScreenBtn?.click();
+    }
+
     const list = document.getElementById("semesterWrapper");
-    list.style.display = list.style.display === "none" ? "" : "none";
-    calendar.updateSize();
+
+    list.classList.toggle("closed");
+
+    setTimeout(() => {
+        calendar.updateSize();
+    }, 350);
 }
+
 
 //this function get's called when we click the button on the calendar has 2 diffrent functions depending on your screen
 toggleScreenBtn.onclick = function () {
@@ -1179,15 +1204,29 @@ function resize() {
 }
 
 //this makes the calendar apear if we click it from mobile
+// function appearCalendar() {
+//     const list = document.getElementById("semesterWrapper");
+//     const calEl = document.getElementById("calendar");
+//     if (window.innerWidth > 767) {
+//         calEl.style.setProperty("display", "flex", "important");
+//         calendar.updateSize();
+//     } else {
+//         calEl.style.setProperty("display", "none", "important");
+//         list.style.display = "flex";
+//     }
+// }
 function appearCalendar() {
     const list = document.getElementById("semesterWrapper");
     const calEl = document.getElementById("calendar");
+
     if (window.innerWidth > 767) {
         calEl.style.setProperty("display", "flex", "important");
+        list.style.display = "flex";
         calendar.updateSize();
     } else {
-        calEl.style.setProperty("display", "none", "important");
-        list.style.display = "flex";
+        calEl.style.setProperty("display", "flex", "important");
+        list.style.display = "none";
+        calendar.updateSize();
     }
 }
 
