@@ -629,6 +629,7 @@ footer {
     padding: 3px;
     background-color: #252d4f;
     height: 4%;
+    gap: 15px;
 }
 
 .filterParam{
