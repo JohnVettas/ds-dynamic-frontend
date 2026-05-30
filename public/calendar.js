@@ -1191,14 +1191,14 @@ toggleScreenBtn.onclick = function () {
 }
 
 //this just resizes the calendar (refresh's it)
-function resize() {
-    const sidebar = document.getElementById("semesterWrapper");
-    if (!sidebar) return;
-    sidebar.style.height = "unset";
-    sidebar.style.height = getComputedStyle(
-        document.getElementById("calendar"),
-    ).height;
-}
+// function resize() {
+//     const sidebar = document.getElementById("semesterWrapper");
+//     if (!sidebar) return;
+//     sidebar.style.height = "unset";
+//     sidebar.style.height = getComputedStyle(
+//         document.getElementById("calendar"),
+//     ).height;
+// }
 
 
 function appearCalendar() {
@@ -1207,28 +1207,23 @@ function appearCalendar() {
     const wrapper = document.getElementById("wrapper");
 
     if (window.innerWidth > 767) {
-        // DESKTOP: Force flex and clean up mobile states
         calEl.style.setProperty("display", "flex", "important");
         list.style.display = "flex";
         wrapper.classList.remove("show-sidebar"); 
     } else {
-        // MOBILE: Clear inline styles and clean up desktop states
         calEl.style.display = "";
         list.style.display = "";
         list.classList.remove("closed"); 
         
-        // IMPORTANT: Wipe any inline widths left over from desktop dragging
+        // Wipe any inline widths left over from desktop dragging
         list.style.width = ""; 
         list.style.flex = "";
     }
     
-    // Give the browser 50ms to snap the layout into place BEFORE the calendar calculates its size
+    // Just update the calendar, CSS will handle the wrapper heights now
     setTimeout(() => {
         if (calendar) {
             calendar.updateSize();
-        }
-        if (window.innerWidth > 767) {
-            resize(); // Match the sidebar height to the newly sized calendar
         }
     }, 50);
 }

@@ -67,6 +67,7 @@ main {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    min-height: 0;
 }
 
 /* Semester button container */
@@ -1062,6 +1063,7 @@ body.dark-theme .dropdown-checkbox:hover {
         transform: translateX(-100%); /* DEFAULT TO SIDEBAR HIDDEN (LEFT) */
         transition: transform 0.4s ease-in-out;
         display: flex !important;
+        overflow-y: hidden;
     }
 
     #search {
