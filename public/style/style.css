@@ -74,11 +74,13 @@ main {
     display: flex;
     height: 3.5em;
     cursor: pointer;
-    justify-content: space-between; /* Pushes text to middle and arrow to right */
+    justify-content: space-between;
+    /* Pushes text to middle and arrow to right */
     align-items: center;
     background-color: #8c2635;
     border: 3px solid rgb(107, 6, 6);
-    padding: 0 15px; /* Adds some breathing room on the sides */
+    padding: 0 15px;
+    /* Adds some breathing room on the sides */
     transition: background-color 0.2s ease;
 }
 
@@ -90,7 +92,8 @@ main {
 
 /* Semester button text */
 .semesterButtons {
-    margin: 0; /* REMOVES default paragraph margins that cause off-centering */
+    margin: 0;
+    /* REMOVES default paragraph margins that cause off-centering */
     flex-grow: 1;
     text-align: center;
     font-size: 1em;
@@ -187,12 +190,13 @@ main {
     position: relative;
     display: inline-flex;
     align-items: center;
-    margin-left: 15px; /* Spacing from the other calendar buttons */
+    margin-left: 15px;
+    /* Spacing from the other calendar buttons */
 }
 
 /* Base Light Mode Icon Color */
 #settings path {
-    stroke: #2f385f; 
+    stroke: #2f385f;
 }
 
 /* Dark Mode Icon Color */
@@ -204,16 +208,18 @@ body.dark-theme #settings path {
 /* Fix Dropdown Positioning inside the header */
 .dropdown-content {
     display: none;
-    position: absolute; 
-    bottom: 100%; 
-    left: 0;       /* Align to the left edge of the icon */
-    right: auto;   /* THIS IS THE FIX: Clears any old "right: 0" rules */
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    /* Align to the left edge of the icon */
+    right: auto;
+    /* THIS IS THE FIX: Clears any old "right: 0" rules */
     margin-bottom: 10px;
     background-color: white;
     min-width: 200px;
-    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     border-radius: 8px;
-    z-index: 9999; 
+    z-index: 9999;
     overflow: hidden;
 }
 
@@ -234,7 +240,7 @@ body.dark-theme #settings path {
 
 /* Generic image sizing */
 .pointer {
-    height: 30px; 
+    height: 30px;
     width: 30px;
     margin-left: 10px;
 }
@@ -257,7 +263,7 @@ footer {
 /* Calendar slot height */
 .fc-timegrid-slot {
     /* clamp(MINIMUM, PREFERRED, MAXIMUM) */
-    height: clamp(2.5em, 4vh, 60px) !important; 
+    height: clamp(2.5em, 4vh, 60px) !important;
 }
 
 /* Logo image */
@@ -302,9 +308,6 @@ footer {
 
 .fc-viewBtn-button {
     height: 40px;
-}
-
-.fc-viewBtn-button {
     margin-left: 10px !important;
 }
 
@@ -447,7 +450,7 @@ footer {
     border-radius: 4px;
     border: none;
     background-color: #848fbe;
-   font-size: 18px;
+    font-size: 18px;
     resize: none;
     outline: none;
 
@@ -511,75 +514,77 @@ footer {
 
 }
 
-#labSlotPopup{
-    font-family: sans-serif; 
-    color: #ffffff; 
-    background-color: #2f385f; 
-    border: 3px solid #0d0f1e; 
-    border-radius: 8px; 
-    padding: 20px; 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+#labSlotPopup {
+    font-family: sans-serif;
+    color: #ffffff;
+    background-color: #2f385f;
+    border: 3px solid #0d0f1e;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     width: 500px;
 }
 
-#labSlotCancel{
+#labSlotCancel {
     padding: 5px 10px;
-    color: rgb(0, 0, 0); 
+    color: rgb(0, 0, 0);
     background-color: rgb(198, 197, 203);
-    border: none; 
-    border-radius: 4px; 
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
 }
 
-#labSlotCancel:hover{
+#labSlotCancel:hover {
     background-color: rgb(169, 168, 176);
 }
 
-#labSlotConfirm{
-    padding: 5px 10px; 
-    background: #8c2635; 
-    color: white; 
-    border: none; 
-    border-radius: 4px; 
-    cursor: pointer; 
+#labSlotConfirm {
+    padding: 5px 10px;
+    background: #8c2635;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
-#labSlotConfirm:hover{
+#labSlotConfirm:hover {
     background: #a83042;
 }
 
 
 /* --- Styling για το Warning Popup --- */
 #labWarningPopup {
-    font-family: sans-serif; 
-    color: #ffffff; 
-    background-color: #2f385f; 
-    border: 3px solid #0d0f1e; 
-    border-radius: 8px; 
-    padding: 20px; 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+    font-family: sans-serif;
+    color: #ffffff;
+    background-color: #2f385f;
+    border: 3px solid #0d0f1e;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     width: 500px;
-    max-width: 90vw; /* Για να μην χαλάει σε μικρές οθόνες */
+    max-width: 90vw;
+    /* Για να μην χαλάει σε μικρές οθόνες */
 }
 
 #labWarningPopup h3 {
     margin-top: 0;
-    color: #e74c3c; /* Κρατάμε το κόκκινο του Warning για έμφαση */
+    color: #e74c3c;
+    /* Κρατάμε το κόκκινο του Warning για έμφαση */
 }
 
 #labWarningPopup .warning-buttons {
-    display: flex; 
-    gap: 10px; 
-    justify-content: flex-end; 
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
     margin-top: 20px;
 }
 
 #labWarningNeverAgain {
     padding: 5px 10px;
-    color: rgb(0, 0, 0); 
+    color: rgb(0, 0, 0);
     background-color: rgb(198, 197, 203);
-    border: none; 
-    border-radius: 4px; 
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
 }
 
@@ -588,12 +593,12 @@ footer {
 }
 
 #labWarningGotIt {
-    padding: 5px 10px; 
-    background: #8c2635; 
-    color: white; 
-    border: none; 
-    border-radius: 4px; 
-    cursor: pointer; 
+    padding: 5px 10px;
+    background: #8c2635;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 #labWarningGotIt:hover {
@@ -601,10 +606,10 @@ footer {
 }
 
 .labRadioButton {
-  
+
     appearance: none;
     -webkit-appearance: none;
-    
+
     width: 18px;
     height: 18px;
     border: 2px solid #8c2635;
@@ -618,10 +623,10 @@ footer {
 
 .labRadioButton:checked {
     background-color: #8c2635;
-    box-shadow: inset 0 0 0 3px #2f385f; 
+    box-shadow: inset 0 0 0 3px #2f385f;
 }
 
-#filterMenu{
+#filterMenu {
     font-family: sans-serif;
     display: none;
     justify-content: center;
@@ -632,7 +637,7 @@ footer {
     gap: 15px;
 }
 
-.filterParam{
+.filterParam {
     width: 40%;
     height: 100%;
     padding: 2px;
@@ -643,31 +648,32 @@ footer {
     cursor: pointer;
 }
 
-#filterSubmit{
+#filterSubmit {
     padding-left: 7px;
     width: 20%;
     height: 90%;
     background-color: #242b4a;
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    
-    border-radius: 4px; 
-    cursor: pointer; 
+
+    border-radius: 4px;
+    cursor: pointer;
 }
 
-#filterSubmit:hover{
+#filterSubmit:hover {
     background-color: #1a1f37;
 }
 
 
 /* 1. MOVE positioning to the new wrapper container */
 .dropdown {
-  position: absolute;
-  right: 25px;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 50%; /* Keep your original height logic here */
-  display: inline-block;
+    position: absolute;
+    right: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 50%;
+    /* Keep your original height logic here */
+    display: inline-block;
 }
 
 /* 2. ADJUST the settings image to fit inside the wrapper */
@@ -689,42 +695,46 @@ footer {
 
 /* Styling for the links inside the menu */
 .dropdown-content a {
-  color: #333;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-  font-family: sans-serif;
-  font-size: 14px;
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-family: sans-serif;
+    font-size: 14px;
 }
 
 /* Hover effect on links */
 .dropdown-content a:hover {
-  background-color: #f1f1f1;
+    background-color: #f1f1f1;
 }
 
 /* Class added by JavaScript to make the menu visible */
 .show {
-  display: block;
+    display: block;
 }
 
 /* Styling for the checkbox container */
 .dropdown-checkbox {
-  color: #333;
-  padding: 12px 16px;
-  display: flex;       /* Aligns box and text in a row */
-  align-items: center; /* Centers them vertically */
-  gap: 10px;           /* Adds space between the box and the text */
-  font-family: sans-serif;
-  font-size: 14px;
-  cursor: pointer;     /* Shows the pointer finger on hover */
+    color: #333;
+    padding: 12px 16px;
+    display: flex;
+    /* Aligns box and text in a row */
+    align-items: center;
+    /* Centers them vertically */
+    gap: 10px;
+    /* Adds space between the box and the text */
+    font-family: sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    /* Shows the pointer finger on hover */
 }
 
 /* Match the hover effect of the links */
 .dropdown-checkbox:hover {
-  background-color: #f1f1f1;
+    background-color: #f1f1f1;
 }
 
-.slider{
+.slider {
     position: relative;
     display: flex;
     align-items: center;
@@ -733,7 +743,7 @@ footer {
     width: 30px;
     background-color: #83d2ff;
     border: 4px solid #83d2ff;
-    border-radius:50px;
+    border-radius: 50px;
     transition: background-color 0.5s ease;
     transition: var(--fc-border-color) 0.5s ease;
     margin-left: auto;
@@ -748,13 +758,13 @@ footer {
 
 }
 
-#sun{
+#sun {
     height: 17px;
     width: 17px;
     transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-#moon{
+#moon {
     opacity: 0;
     height: 0px;
     width: 0px;
@@ -763,8 +773,8 @@ footer {
 
 /* --- Bulletproof FullCalendar Dark Theme --- */
 
-body.dark-theme .slider{
-    
+body.dark-theme .slider {
+
     height: 30px;
     width: 30px;
     background-color: #1c184b;
@@ -776,14 +786,14 @@ body.dark-theme .slider{
     margin-left: auto;
 }
 
-body.dark-theme #sun{
+body.dark-theme #sun {
     opacity: 0;
     height: 0px;
     width: 0px;
     transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-body.dark-theme #moon{
+body.dark-theme #moon {
     opacity: 1;
     height: 15px;
     width: 15px;
@@ -791,22 +801,22 @@ body.dark-theme #moon{
 }
 
 body.dark-theme .fc {
-  /* Override FullCalendar's native CSS variables */
-  --fc-page-bg-color: #1e1e1e;
-  --fc-neutral-bg-color: #2a2a2a;
-  --fc-neutral-text-color: #ffffff;
-  --fc-border-color: #444444;
-  --fc-today-bg-color: #4400ff !important;
-  --fc-button-text-color: #ffffff;
-  --fc-button-bg-color: #333333;
-  --fc-button-border-color: #555555;
-  --fc-button-hover-bg-color: #444444;
-  --fc-button-hover-border-color: #666666;
-  --fc-button-active-bg-color: #555555;
-  --fc-button-active-border-color: #777777;
+    /* Override FullCalendar's native CSS variables */
+    --fc-page-bg-color: #1e1e1e;
+    --fc-neutral-bg-color: #2a2a2a;
+    --fc-neutral-text-color: #ffffff;
+    --fc-border-color: #444444;
+    --fc-today-bg-color: #4400ff !important;
+    --fc-button-text-color: #ffffff;
+    --fc-button-bg-color: #333333;
+    --fc-button-border-color: #555555;
+    --fc-button-hover-bg-color: #444444;
+    --fc-button-hover-border-color: #666666;
+    --fc-button-active-bg-color: #555555;
+    --fc-button-active-border-color: #777777;
 
-  /* Force the text color */
-  color: #ffffff;
+    /* Force the text color */
+    color: #ffffff;
 }
 
 /* Force the backgrounds of the grids, tables, and cells to be dark */
@@ -815,22 +825,23 @@ body.dark-theme .fc-theme-standard td,
 body.dark-theme .fc-theme-standard th,
 body.dark-theme .fc-view-harness,
 body.dark-theme .fc-view {
-  background-color: #1e1e1e !important;
-  border-color: #444444 !important;
+    background-color: #1e1e1e !important;
+    border-color: #444444 !important;
 }
 
 /* Keep header links (like days/times) readable */
 body.dark-theme .fc a {
-  color: #dddddd !important;
+    color: #dddddd !important;
 }
 
 /* Fix the color of the "more" popover if events stack up */
 body.dark-theme .fc-popover {
-  background-color: #2a2a2a !important;
-  border-color: #444444 !important;
+    background-color: #2a2a2a !important;
+    border-color: #444444 !important;
 }
+
 body.dark-theme .fc-popover-header {
-  background-color: #333333 !important;
+    background-color: #333333 !important;
 }
 
 /* FullCalendar Header & Buttons to Dark Mode */
@@ -847,8 +858,8 @@ body.dark-theme .fc .fc-timegrid-col.fc-day-today {
 }
 
 body.dark-theme .fc-timegrid-col-frame {
-  border-left: solid 0.01px #444444 !important;
-  z-index: 1000
+    border-left: solid 0.01px #444444 !important;
+    z-index: 1000
 }
 
 body.dark-theme .fc-header-toolbar {
@@ -859,70 +870,113 @@ body.dark-theme .fc-header-toolbar {
 
 /* 2. Fix the Header Buttons (Today, Arrows, View options) */
 body.dark-theme .fc .fc-button-primary {
-  background-color: #333333 !important;
-  border-color: #555555 !important;
-  color: #ffffff !important;
-  box-shadow: none !important; /* Removes any weird Bootstrap glowing borders */
+    background-color: #333333 !important;
+    border-color: #555555 !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    /* Removes any weird Bootstrap glowing borders */
 }
 
 /* 3. Hover state for buttons */
 body.dark-theme .fc .fc-button-primary:hover {
-  background-color: #4a4a4a !important;
-  border-color: #666666 !important;
-  color: #ffffff !important;
+    background-color: #4a4a4a !important;
+    border-color: #666666 !important;
+    color: #ffffff !important;
 }
 
 /* 4. Active/Clicked state for buttons */
 body.dark-theme .fc .fc-button-primary:not(:disabled):active,
 body.dark-theme .fc .fc-button-primary.fc-button-active {
-  background-color: #555555 !important;
-  border-color: #777777 !important;
-  color: #ffffff !important;
+    background-color: #555555 !important;
+    border-color: #777777 !important;
+    color: #ffffff !important;
 }
 
 /* 5. Fix the little arrow icons inside the prev/next buttons */
 body.dark-theme .fc .fc-icon {
-  color: #ffffff !important;
+    color: #ffffff !important;
 }
 
 
 /* --- Dark Mode for the Settings Dropdown --- */
 body.dark-theme .dropdown-content {
-  background-color: #2a2a2a; /* Matches your dark theme */
-  border: 1px solid #444444;
+    background-color: #2a2a2a;
+    /* Matches your dark theme */
+    border: 1px solid #444444;
 }
 
 body.dark-theme .dropdown-content a,
 body.dark-theme .dropdown-checkbox {
-  color: #ffffff;
+    color: #ffffff;
 }
 
 body.dark-theme .dropdown-content a:hover,
 body.dark-theme .dropdown-checkbox:hover {
-  background-color: #444444;
+    background-color: #444444;
 }
 
 /* --- PDF Download Link in Sidebar --- */
-#pdf-wrapper, #exam-pdf-wrapper {
+#pdf-wrapper,
+#exam-pdf-wrapper {
     text-align: center;
-    margin: 20px 0; /* Gives it some breathing room at the bottom of the list */
+    margin: 20px 0;
+    /* Gives it some breathing room at the bottom of the list */
 }
 
 #pdf-download-link {
-    color: #bec6ea; /* Soft blue matching your existing links */
+    color: #bec6ea;
+    /* Soft blue matching your existing links */
     text-decoration: underline;
-    font-size: 0.85em; /* Keeps it small and subtle */
+    font-size: 0.85em;
+    /* Keeps it small and subtle */
     font-family: sans-serif;
     transition: color 0.2s ease;
 }
 
 #pdf-download-link:hover {
-    color: #ffffff; /* Brightens up when the user hovers over it */
+    color: #ffffff;
+    /* Brightens up when the user hovers over it */
 }
 
 
 /* Mobile layout */
 @media (max-width: 767px) {
+
+    .fc .fc-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .fc .fc-toolbar-title {
+        flex: 0 0 100%;
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .fc .fc-toolbar-chunk:nth-child(1) {
+        flex: 0 0 auto;
+    }
+
+    .fc .fc-toolbar-chunk:nth-child(2) {
+        flex: 1 1 auto;
+        display: flex;
+        justify-content: center;
+    }
+
+    .fc .fc-toolbar-chunk:nth-child(3) {
+        flex: 1 1 100%;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+        margin-left: 50px;
+    }
+
+    .fc .fc-toolbar-chunk:nth-child(3) {
+        flex-wrap: wrap;
+    }
 
     #wrapper {
         flex-direction: column-reverse;
@@ -947,6 +1001,18 @@ body.dark-theme .dropdown-checkbox:hover {
 
     #toggleScreen {
         display: block;
+        position: fixed;
+        top: 35px;
+        left: 3px;
+        z-index: 10000;
+        background: none;
+        border: none;
+    }
+
+    #toggleScreen svg {
+        width: 65px;
+        height: 65px;
+        color: rgba(255, 255, 255, 0.883);
     }
 
     #semesters {
@@ -965,10 +1031,12 @@ body.dark-theme .dropdown-checkbox:hover {
         flex-direction: column;
     }
 
-    .fc .fc-toolbar {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+    #search {
+        justify-content: right;
+    }
+
+    #searchbar {
+        width: 75%;
     }
 
     .fc #fc-dom-1 {
@@ -1014,41 +1082,65 @@ body.dark-theme .dropdown-checkbox:hover {
     }
 }
 
-/* Tablet layout */
+
 @media (min-width: 768px) and (max-width: 1100px) {
 
+    .fc-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .fc-toolbar-title {
+        flex: 1 1 100%;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .fc-toolbar-chunk:nth-child(1) {
+        flex: 0 0 auto;
+    }
+
+    .fc-toolbar-chunk:nth-child(2) {
+        flex: 1 1 auto;
+        display: flex;
+        justify-content: center;
+    }
+
     .fc-toolbar-chunk:nth-child(3) {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-areas:
-            "download view"
-            "today next_prev";
+        flex: 1 1 100%;
+        display: flex;
+        justify-content: center;   
+        margin-top: 10px;
         gap: 10px;
-        margin-right: 10px;
+        margin-left: 50px;
+    }
+
+    .fc-toolbar-chunk:nth-child(3) {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
     }
 
     .fc-downloadBtn-button {
-        grid-area: download;
+        order: 1;
     }
 
     .fc-today-button {
-        grid-area: today;
+        order: 2;
     }
 
     .fc-button-group {
-        grid-area: next_prev;
+        order: 3;
     }
 
     .fc-viewBtn-button {
-        grid-area: view;
+        margin-left: 10px !important;
     }
-
-    .fc-downloadBtn-button,
-    .fc-button-group {
-        justify-self: end;
-    }
-
 }
+
+
 
 /* --- Legal Disclaimer Banner --- */
 .legal-banner {
@@ -1056,13 +1148,13 @@ body.dark-theme .dropdown-checkbox:hover {
     bottom: 0;
     left: 0;
     width: 100%;
-    background-color: #2f385f; 
+    background-color: #2f385f;
     color: white;
     padding: 15px 10px;
     text-align: center;
-    box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
-    z-index: 10001; 
-    display: none; 
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 10001;
+    display: none;
     font-family: sans-serif;
 }
 
@@ -1079,7 +1171,7 @@ body.dark-theme .dropdown-checkbox:hover {
 }
 
 .legal-content button {
-    background-color: #8c2635; 
+    background-color: #8c2635;
     color: white;
     border: none;
     padding: 8px 20px;
@@ -1094,15 +1186,17 @@ body.dark-theme .dropdown-checkbox:hover {
     background-color: #a83042;
 }
 
-@media (max-width: 400px){
+@media (max-width: 400px) {
     #settings {
         height: 40px;
         width: 40px;
     }
-    #logo{
+
+    #logo {
         width: 260px;
     }
-    header{
+
+    header {
         height: 80px;
     }
 
