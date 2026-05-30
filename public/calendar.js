@@ -675,15 +675,34 @@ function removeStandaloneExam(title) {
     saveExams(saved.filter((e) => e.title !== title));
 }
 
-//INITIALIZATION of calendar
 document.addEventListener("DOMContentLoaded", async function () {
     const calendarEl = document.getElementById("calendar");
+
+    let hasSaturday = false;
+
+    if (mergedScheduleData) {
+        hasSaturday = mergedScheduleData.some(course => course.daysOfWeek && course.daysOfWeek.includes(6));
+    }
+    if (!hasSaturday && mergedLabsData) {
+        hasSaturday = mergedLabsData.some(lab => lab.data && lab.data.some(slot => parseInt(slot.day) === 6));
+    }
+    if (!hasSaturday && mergedExamsData) {
+        hasSaturday = mergedExamsData.some(exam => {
+            if (!exam.date) return false;
+            const [day, month, year] = exam.date.split("/");
+            return new Date(year, month - 1, day).getDay() === 6;
+        });
+    }
+
+    // If Saturday exists, hide only Sunday (0). Otherwise, hide both (0, 6).
+    const daysToHide = hasSaturday ? [0] : [0, 6];
 
     calendar = new FullCalendar.Calendar(calendarEl, {
         timeZone: "Europe/Athens",
         initialView: "timeGridWeek",
         locale: "el",
         firstDay: 1,
+        hiddenDays: daysToHide, // <--- Assign the variable here
         slotMinTime: "08:00:00",
         slotMaxTime: "21:00:00",
         allDaySlot: false,
