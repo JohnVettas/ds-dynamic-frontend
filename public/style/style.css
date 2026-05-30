@@ -979,18 +979,38 @@ body.dark-theme .dropdown-checkbox:hover {
     }
 
     #wrapper {
-        flex-direction: column-reverse;
+        position: relative;
+        overflow: hidden; /* Hides the horizontal sliding */
+        display: flex;
+        flex-direction: row; 
     }
 
     #calendar {
-        flex: none;
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
-        display: none;
+        height: 100%;
+        overflow-y: auto; /* THIS FIXES THE FROZEN SCROLLING */
+        overflow-x: hidden;
+        transform: translateX(0); /* DEFAULT TO CALENDAR VISIBLE */
+        transition: transform 0.4s ease-in-out;
+        display: flex !important;
     }
+
+    
 
     #clearDiv {
         flex-direction: row;
         justify-content: center;
+    }
+
+    #wrapper.show-sidebar #semesterWrapper {
+        transform: translateX(0); /* Slides sidebar in */
+    }
+
+    #wrapper.show-sidebar #calendar {
+        transform: translateX(100%); /* Slides calendar out (RIGHT) */
     }
 
     .bottomButtons {
@@ -1003,7 +1023,8 @@ body.dark-theme .dropdown-checkbox:hover {
         display: block;
         position: fixed;
         top: 35px;
-        left: 3px;
+        left: 0px;
+        padding: 0px;
         z-index: 10000;
         background: none;
         border: none;
@@ -1013,7 +1034,14 @@ body.dark-theme .dropdown-checkbox:hover {
         width: 65px;
         height: 65px;
         color: rgba(255, 255, 255, 0.883);
+        filter: drop-shadow(2px 4px 8px rgba(0, 0, 0, 0.5));
+        transition: all 0.3s ease;
     }
+
+    #toggleScreen:hover svg {
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 1));
+    transform: scale(1.1);
+}
 
     #semesters {
         width: 100%;
@@ -1023,20 +1051,26 @@ body.dark-theme .dropdown-checkbox:hover {
     }
 
     #semesterWrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100% !important;
+        height: 100%;
         min-width: unset;
         max-width: unset;
-        flex: 1;
-        display: flex;
         flex-direction: column;
+        transform: translateX(-100%); /* DEFAULT TO SIDEBAR HIDDEN (LEFT) */
+        transition: transform 0.4s ease-in-out;
+        display: flex !important;
     }
 
     #search {
         justify-content: right;
+        min-height: 30px;
     }
 
     #searchbar {
-        width: 75%;
+        width: 80%;
     }
 
     .fc #fc-dom-1 {

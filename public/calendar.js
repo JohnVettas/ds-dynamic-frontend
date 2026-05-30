@@ -1181,16 +1181,13 @@ function hideList() {
 
 //this function get's called when we click the button on the calendar has 2 diffrent functions depending on your screen
 toggleScreenBtn.onclick = function () {
-    const list = document.getElementById("semesterWrapper");
-    const calEl = document.getElementById("calendar");
-    if (calEl.style.display === "flex") {
-        calEl.style.setProperty("display", "none", "important");
-        list.style.display = "flex";
-    } else {
-        list.style.display = "none";
-        calEl.style.setProperty("display", "flex", "important");
+    const wrapper = document.getElementById("wrapper");
+    wrapper.classList.toggle("show-sidebar");
+    
+    // Refresh the calendar layout right after the slide animation finishes (400ms)
+    setTimeout(() => {
         calendar.updateSize();
-    }
+    }, 400);
 }
 
 //this just resizes the calendar (refresh's it)
@@ -1203,37 +1200,62 @@ function resize() {
     ).height;
 }
 
-//this makes the calendar apear if we click it from mobile
-// function appearCalendar() {
-//     const list = document.getElementById("semesterWrapper");
-//     const calEl = document.getElementById("calendar");
-//     if (window.innerWidth > 767) {
-//         calEl.style.setProperty("display", "flex", "important");
-//         calendar.updateSize();
-//     } else {
-//         calEl.style.setProperty("display", "none", "important");
-//         list.style.display = "flex";
-//     }
-// }
+
 function appearCalendar() {
     const list = document.getElementById("semesterWrapper");
     const calEl = document.getElementById("calendar");
+    const wrapper = document.getElementById("wrapper");
 
     if (window.innerWidth > 767) {
+        // DESKTOP: Force flex and clean up mobile states
         calEl.style.setProperty("display", "flex", "important");
         list.style.display = "flex";
-        calendar.updateSize();
+        wrapper.classList.remove("show-sidebar"); 
     } else {
-        calEl.style.setProperty("display", "flex", "important");
-        list.style.display = "none";
-        calendar.updateSize();
+        // MOBILE: Clear inline styles and clean up desktop states
+        calEl.style.display = "";
+        list.style.display = "";
+        list.classList.remove("closed"); 
+        
+        // IMPORTANT: Wipe any inline widths left over from desktop dragging
+        list.style.width = ""; 
+        list.style.flex = "";
     }
+    
+    // Give the browser 50ms to snap the layout into place BEFORE the calendar calculates its size
+    setTimeout(() => {
+        if (calendar) {
+            calendar.updateSize();
+        }
+        if (window.innerWidth > 767) {
+            resize(); // Match the sidebar height to the newly sized calendar
+        }
+    }, 50);
 }
+
+// A timer variable for "debouncing" the resize event
+let resizeTimer;
+
+// Trigger updates when resizing or rotating the device
+window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    
+    // Wait until the rotation/resizing is completely finished (250ms)
+    resizeTimer = setTimeout(() => {
+        appearCalendar(); 
+        
+        if (window.innerWidth > 767) {
+            resizeWrapper();
+        }
+    }, 250); 
+});
 
 //resize wrapper/sidebar on window change
 function resizeWrapper() {
     const sidebar = document.getElementById("semesterWrapper");
-    if (sidebar) {
+    // Only reset the width if we are transitioning from mobile, 
+    // otherwise we destroy the user's custom dragged width!
+    if (sidebar && sidebar.offsetWidth === 0) {
         sidebar.style.width = "280px";
     }
 }
@@ -1311,13 +1333,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-addEventListener("resize", () => {
-    if (window.innerWidth > 767) {
-        appearCalendar();
-        resize();
-        resizeWrapper();
-    }
-});
+
 
 // Event listener for the searchbar
 searchbar.addEventListener("keyup", async function (e) {
