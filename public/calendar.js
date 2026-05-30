@@ -1190,15 +1190,25 @@ toggleScreenBtn.onclick = function () {
     }, 400);
 }
 
-//this just resizes the calendar (refresh's it)
-// function resize() {
-//     const sidebar = document.getElementById("semesterWrapper");
-//     if (!sidebar) return;
-//     sidebar.style.height = "unset";
-//     sidebar.style.height = getComputedStyle(
-//         document.getElementById("calendar"),
-//     ).height;
-// }
+// Synchronizes the sidebar height to match the calendar height on desktop
+function resize() {
+    const sidebar = document.getElementById("semesterWrapper");
+    const calEl = document.getElementById("calendar");
+    
+    if (!sidebar || !calEl) return;
+    
+    if (window.innerWidth > 767) {
+        // Clear forced height so the layout calculates naturally
+        sidebar.style.height = "auto";
+        
+        // Grab the exact pixel height of the calendar and lock the sidebar to it
+        const calHeight = getComputedStyle(calEl).height;
+        sidebar.style.height = calHeight;
+    } else {
+        // On mobile, clear it out so it can slide freely
+        sidebar.style.height = "";
+    }
+}
 
 
 function appearCalendar() {
@@ -1220,11 +1230,12 @@ function appearCalendar() {
         list.style.flex = "";
     }
     
-    // Just update the calendar, CSS will handle the wrapper heights now
+    // Update the calendar grid, then lock the sidebar height!
     setTimeout(() => {
         if (calendar) {
             calendar.updateSize();
         }
+        resize(); 
     }, 50);
 }
 

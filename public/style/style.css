@@ -372,6 +372,7 @@ footer {
         opacity 0.35s ease,
         width 0.35s ease,
         min-width 0.35s ease;
+    overflow-y: hidden;
 }
 
 #semesterWrapper.closed {
@@ -1049,6 +1050,10 @@ body.dark-theme .dropdown-checkbox:hover {
         height: auto;
         max-height: none;
         padding-bottom: 5px;
+
+        flex: 1;
+        overflow-y: auto; 
+        min-height: 0;
     }
 
     #semesterWrapper {
