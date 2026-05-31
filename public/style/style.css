@@ -971,9 +971,8 @@ body.dark-theme .dropdown-checkbox:hover {
         flex: 1 1 100%;
         display: flex;
         justify-content: center;
-        gap: 10px;
+        gap: 5px;
         margin-top: 10px;
-        margin-left: 50px;
     }
 
     .fc .fc-toolbar-chunk:nth-child(3) {
@@ -1098,7 +1097,7 @@ body.dark-theme .dropdown-checkbox:hover {
         grid-template-columns: 1fr 1fr 1fr;
         grid-template-areas:
             "download today next_prev";
-        gap: 10px;
+        gap: 5px;
     }
 
     .fc-downloadBtn-button {
