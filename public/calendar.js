@@ -1631,10 +1631,32 @@ const darkModeToggle = document.getElementById("dark-mode-toggle");
 
 if (darkModeToggle) {
     const savedTheme = localStorage.getItem("userTheme");
+    const prefersDark =
+        window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-    if (savedTheme === "dark") {
-        document.body.classList.add("dark-theme");
-        darkModeToggle.checked = true;
+    const applyTheme = (theme) => {
+        if (theme === "dark") {
+            document.body.classList.add("dark-theme");
+            darkModeToggle.checked = true;
+        } else {
+            document.body.classList.remove("dark-theme");
+            darkModeToggle.checked = false;
+        }
+    };
+
+    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+        applyTheme("dark");
+    } else {
+        applyTheme("light");
+    }
+
+    const colorSchemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    if (colorSchemeQuery.addEventListener) {
+        colorSchemeQuery.addEventListener("change", (event) => {
+            if (!localStorage.getItem("userTheme")) {
+                applyTheme(event.matches ? "dark" : "light");
+            }
+        });
     }
 
     darkModeToggle.addEventListener("change", function (event) {
