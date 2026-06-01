@@ -944,6 +944,11 @@ body.dark-theme .dropdown-checkbox:hover {
 /* Mobile layout */
 @media (max-width: 767px) {
 
+
+    body:has(#wrapper.show-sidebar) footer {
+        display: none;
+    }
+    
     .fc .fc-toolbar {
         display: flex;
         flex-wrap: wrap;
@@ -979,22 +984,25 @@ body.dark-theme .dropdown-checkbox:hover {
         flex-wrap: wrap;
     }
 
+    body:has(#wrapper.show-sidebar) {
+        overflow: hidden; /* Prevents the background from scrolling while the menu is open */
+    }
+
     #wrapper {
         position: relative;
-        overflow: hidden; /* Hides the horizontal sliding */
+        overflow-x: hidden; /* Hide horizontal sliding */
+        overflow-y: visible; /* Allow normal page scrolling */
         display: flex;
         flex-direction: row; 
     }
 
     #calendar {
-        position: absolute;
-        top: 0;
-        left: 0;
+        position: relative; /* Restores normal document flow */
         width: 100%;
-        height: 100%;
-        overflow-y: auto; /* THIS FIXES THE FROZEN SCROLLING */
-        overflow-x: hidden;
-        transform: translateX(0); /* DEFAULT TO CALENDAR VISIBLE */
+        flex-shrink: 0;
+        height: auto; /* Lets the calendar dictate the page height */
+        overflow: visible; /* Lets the whole page scroll to reach the footer */
+        transform: translateX(0);
         transition: transform 0.4s ease-in-out;
         display: flex !important;
     }
@@ -1055,16 +1063,24 @@ body.dark-theme .dropdown-checkbox:hover {
         min-height: 0;
     }
 
+    #examsBox {
+        width: 100%;
+        height: auto;
+        overflow-y: auto;
+        padding-bottom: 80px;
+    }
+
     #semesterWrapper {
-        position: absolute;
+        position: fixed; /* Locks to screen so it doesn't open off-screen if you scroll down */
         top: 0;
         left: 0;
+        z-index: 1005; /* Ensures it stays above the calendar */
         width: 100% !important;
-        height: 100%;
+        height: 100dvh; /* Exact viewport height */
         min-width: unset;
         max-width: unset;
         flex-direction: column;
-        transform: translateX(-100%); /* DEFAULT TO SIDEBAR HIDDEN (LEFT) */
+        transform: translateX(-100%);
         transition: transform 0.4s ease-in-out;
         display: flex !important;
         overflow-y: hidden;

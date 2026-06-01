@@ -348,9 +348,11 @@ async function examOptions() {
         }
 
     };
-    if (currentMode === "Εξεταστική") {
-        normalExam.click();
-        embolimExam.click();
+if (currentMode === "Εξεταστική") {
+        setTimeout(() => {
+            if (!normalExam.classList.contains("active")) normalExam.click();
+            if (!embolimExam.classList.contains("active")) embolimExam.click();
+        }, 50);
     }
 
 }
@@ -751,16 +753,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         </svg>
         `;
 
-    // const leftToolbar = document.querySelector('.fc-header-toolbar .fc-toolbar-chunk:first-child');
-    // const settingsWrapper = document.getElementById('settings-wrapper');
-
-    // if (leftToolbar && settingsWrapper) {
-    //     leftToolbar.style.display = 'flex';
-    //     leftToolbar.style.alignItems = 'center';
-    //     leftToolbar.appendChild(settingsWrapper);
-    // }
-
-    // Populate Holidays, this code gives names, dates and data to the holidays
     if (academicData?.holidays) {
         academicData.holidays.forEach((holiday) => {
             let start = holiday.date,
