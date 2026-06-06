@@ -647,6 +647,9 @@ function addStandaloneExam(examData) {
                 lectureHall: hallString,
                 description: examData.division ? `Κλιμάκιο: ${examData.division}` : "",
                 isExam: true,
+                rawDate: examData.date,       
+                rawStart: examData.startTime, 
+                rawEnd: examData.endTime
             },
         });
 
@@ -1099,18 +1102,30 @@ function downloadCalendar() {
     // 4. Add exams to the calendar (using a Set to prevent drawing the same exam twice)
     const uniqueExams = new Set();
     events.forEach((event) => {
-        if (
-            !uniqueExams.has(event.title)
-        ) {
+        
+        // Only process events explicitly marked as exams 
+        if (event.extendedProps.isExam && !uniqueExams.has(event.title)) {
+            
+            // Safety check: if an exam doesn't have a valid date yet, skip it completely
+            if (!event.start) return; 
+
+            // FullCalendar stores 'Europe/Athens' times as "fake UTC" internally. 
+            // We extract these specific integers directly to construct a local time string.
+            const pad = (n) => (n < 10 ? "0" + n : n);
+            
+            const startTimeStr = `${pad(event.start.getUTCMonth() + 1)}/${pad(event.start.getUTCDate())}/${event.start.getUTCFullYear()} ${pad(event.start.getUTCHours())}:${pad(event.start.getUTCMinutes())}:00`;
+            
+            const endObj = event.end || new Date(event.start.getTime() + 7200000);
+            const endTimeStr = `${pad(endObj.getUTCMonth() + 1)}/${pad(endObj.getUTCDate())}/${endObj.getUTCFullYear()} ${pad(endObj.getUTCHours())}:${pad(endObj.getUTCMinutes())}:00`;
+
             cal.addEvent(
                 event.title,
                 event.extendedProps.description || "Exam",
                 event.extendedProps.lectureHall || "",
-                event.start.toISOString(),
-                (
-                    event.end || new Date(event.start.getTime() + 7200000)
-                ).toISOString(), // Default to 2 hours if no end time
+                startTimeStr,
+                endTimeStr
             );
+            
             uniqueExams.add(event.title); // Mark this exam as processed
         }
     });
@@ -1124,9 +1139,9 @@ function downloadCalendar() {
         "DTSTAMP:$1Z",
     );
 
-    // Google prefers clean DTSTART/DTEND tags without the VALUE parameter
-    icsString = icsString.replace(/DTSTART;VALUE=DATE-TIME:/g, "DTSTART:");
-    icsString = icsString.replace(/DTEND;VALUE=DATE-TIME:/g, "DTEND:");
+    // Force Athens Timezone on ALL events aggressively (catches all variations of DTSTART/DTEND)
+    icsString = icsString.replace(/DTSTART[^:]*:(\d{8}T\d{6})Z?/g, "DTSTART;TZID=Europe/Athens:$1");
+    icsString = icsString.replace(/DTEND[^:]*:(\d{8}T\d{6})Z?/g, "DTEND;TZID=Europe/Athens:$1");
     // Force unique IDs so Google Calendar doesn't silently ignore deleted test events
     icsString = icsString.replace(
         /UID:\d+@default/g,
